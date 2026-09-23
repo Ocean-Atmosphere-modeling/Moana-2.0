@@ -1,0 +1,18 @@
+# ROMS build products (created by Apps/*/build_roms.sh)
+Build_roms/
+Build_*/
+romsS
+romsM
+romsG
+romsO
+
+# Compiler intermediates
+*.o
+*.mod
+*.a
+
+# Model input/output data and run logs
+*.nc
+*.out
+*.log
+slurm-*.out
