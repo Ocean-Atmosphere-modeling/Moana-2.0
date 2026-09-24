@@ -81,19 +81,23 @@ fi
 
 # Regression check: the energy diagnostics ROMS prints every time step
 # (step, date, kinetic, potential and total energy, volume) must match the
-# reference exactly. The build uses -fp-model precise, so the same code,
-# toolchain, CPU type and tiling reproduce them digit for digit.
+# reference within the tolerance given in that file (scripts/compare_energy.sh).
+# The last digits can differ between CPU types and machines, so exact digits
+# are only expected on the same node type; a real change is far larger.
 num='[-+0-9.E]+'
 grep -E "^ +[0-9]+ [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:.]+ +${num} +${num} +${num} +${num} *$" \
   roms.log > energy.txt || true
-if ! diff -q <(grep -v '^#' "${APP_DIR}/reference_energy.txt") energy.txt > /dev/null; then
-  diff <(grep -v '^#' "${APP_DIR}/reference_energy.txt") energy.txt | head -20
+"${SRC}/scripts/compare_energy.sh" "${APP_DIR}/reference_energy.txt" energy.txt \
+  > compare.txt 2>&1 || compare_status=$?
+{ echo ""; echo "## Regression check"; cat compare.txt; } >> receipt_node.txt
+if [ "${compare_status:-0}" -ne 0 ]; then
+  cat compare.txt
   echo "FAIL: results differ from ${APP}/reference_energy.txt (see above)."
   echo "If the change is expected (new ROMS version, modules or options),"
   echo "check the run, then update the reference as described in that file."
   exit 1
 fi
 
-echo "PASS: UPWELLING built, ran on ${NP} MPI ranks and matched the reference"
+echo "PASS: UPWELLING built, ran on ${NP} MPI ranks and matched the reference within tolerance"
 echo "Output: ${RUN_DIR}"
 ls -l *.nc

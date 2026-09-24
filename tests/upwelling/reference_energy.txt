@@ -1,17 +1,29 @@
-# Reference energy diagnostics for the UPWELLING test (compared exactly by
-# run_upwelling.slurm; lines starting with "#" are ignored).
+# Reference energy diagnostics for the UPWELLING test (compared by
+# run_upwelling.slurm with scripts/compare_energy.sh; lines starting with "#"
+# are ignored). Each value may differ from this by at most rtol times the
+# largest value in its column; steps and dates must match exactly.
+#
+# rtol: 1e-6
 #
 # Made with: ROMS roms-3.7-267-g57aecf58, oneapi/2025.3.0 (ifx 2025.3.0),
 # impi/2021.17, netcdf-fortran/4.6.3, -fp-model precise -heap-arrays -O3 -traceback,
 # NtileI=2 NtileJ=2, on Amarel (run of 2026-09-24, Slurm job 61811179).
 #
+# Tolerance: on 2026-09-24 the same build gave identical digits on icelake,
+# skylake, sapphirerapids and emeraldrapids nodes (jobs 61829887, 61833173,
+# 61833176, 61833177). rtol=1e-6 is about the precision ROMS prints (7
+# digits) and leaves room for other machines (e.g. AWS). Raising VISC2 by
+# 1% (job 61833233) moved kinetic energy by 6.1e-6 (total energy 1.5e-7), so
+# the test catches a change of that size; much smaller ones may pass.
+# Revisit rtol after the first run on a new machine or toolchain.
+#
 # To update after an intended change (new ROMS version, modules, options or
 # tiling): run the test, check the output (scripts/plot_upwelling.py), then
-#   cp tests/upwelling/run_<date>_<time>/energy.txt tests/upwelling/reference_energy.txt
-# put this header back with the new versions, and commit it saying why the
-# results changed.
-#
-# step  date  time  KINETIC_ENRG  POTEN_ENRG  TOTAL_ENRG  NET_VOLUME
+# keep this header, replace the numbers and update "Made with" above:
+#   { grep '^#' tests/upwelling/reference_energy.txt
+#     cat tests/upwelling/run_<date>_<time>/energy.txt; } > new_reference.txt
+#   mv new_reference.txt tests/upwelling/reference_energy.txt
+# and commit it saying why the results changed.
          0 0001-01-01 00:00:00.00  0.000000E+00  6.585677E+02  6.585677E+02  3.884376E+11
          1 0001-01-01 00:05:00.00  6.479408E-13  6.585677E+02  6.585677E+02  3.884376E+11
          2 0001-01-01 00:10:00.00  9.292819E-12  6.585677E+02  6.585677E+02  3.884376E+11

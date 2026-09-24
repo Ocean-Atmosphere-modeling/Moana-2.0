@@ -145,6 +145,7 @@ Moana-2.0/
 ├── scripts/submit_run.sh  checks, copies the code, writes the receipt, submits
 ├── scripts/record_env.sh  writes the "receipt" for a build or run
 ├── scripts/check_inputs.sh  checks input files against inputs.tsv
+├── scripts/compare_energy.sh  regression check: energy vs. reference, within tolerance
 ├── scripts/plot_upwelling.py  figures from an UPWELLING test run
 ├── tests/upwelling/       toolchain and regression test, template for a new application
 ├── .gitignore             keeps big/generated files (builds, *.nc) out of git
@@ -194,9 +195,21 @@ log, ROMS log, the `.in` file used, NetCDF output) is in
 `tests/upwelling/run_<date>_<time>/`, which git ignores.
 
 `PASS` means more than "it ran": the energy diagnostics ROMS prints every
-time step must match `tests/upwelling/reference_energy.txt` digit for digit.
+time step must match `tests/upwelling/reference_energy.txt` within a small
+tolerance (the `# rtol:` line in that file), checked by
+`scripts/compare_energy.sh`. Time steps and dates must match exactly.
+
+Why a tolerance and not exact digits? Different CPU types (Amarel has
+several, and AWS has others) take slightly different paths through the
+math library, so the last digits can differ even with the same code and
+modules. (In practice, the four Amarel CPU types we tried gave identical
+digits.) The tolerance, about the 7 digits ROMS prints, leaves room for
+other machines while still catching real changes: raising the viscosity
+by 1% fails the test. Each run records how close it came in
+`receipt_node.txt`; the reference file explains how the tolerance was set.
+
 If you change the ROMS version, modules or build options and the numbers
-move, the test fails and shows the difference. If the change is expected,
+move beyond the tolerance, the test fails and shows the difference. If the change is expected,
 check the new run and update the reference as explained at the top of that
 file, with a commit message saying why the results changed.
 
