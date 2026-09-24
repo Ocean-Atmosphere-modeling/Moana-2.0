@@ -65,9 +65,13 @@ git -C "${REPO}/roms" archive "${roms_commit}" | tar -x -C "${SRC}/roms"
   echo "app:       ${APP}"
   echo "moana-2.0: ${code_commit}"
   echo "roms:      ${roms_commit}"
-  if [ -n "${dirty}" ]; then
+  if [ "${code_commit}" != "$(git -C "${REPO}" rev-parse HEAD)" ] \
+     || [ "${roms_commit}" != "$(git -C "${REPO}/roms" rev-parse HEAD)" ]; then
     echo "WARNING: submitted with --allow-dirty; the commits above are"
     echo "temporary snapshots of uncommitted edits and may not exist later."
+  elif [ -n "${dirty}" ]; then
+    echo "NOTE: submitted with --allow-dirty; only untracked files differed"
+    echo "(listed above) and they are not in src/."
   fi
   echo ""
   echo "## Configuration checksums (sha256)"

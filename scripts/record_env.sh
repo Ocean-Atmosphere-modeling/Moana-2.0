@@ -61,7 +61,7 @@ else
 fi
 
 section "Toolchain"
-for c in ifort ifx gfortran mpif90 mpirun; do show $c --version; done
+for c in ifort ifx gfortran mpiifx mpif90 mpirun; do show $c --version; done
 show nf-config --all
 show nc-config --version
 show ncks --version
