@@ -8,7 +8,7 @@
 #
 # On Amarel the NetCDF-Fortran module is only built for the Intel oneAPI
 # compiler (ifx) with Intel MPI, so that is the ROMS toolchain. It matches
-# FORT=ifx and which_MPI=oneapi in Apps/moana/build_roms.sh.
+# FORT=ifx and which_MPI=oneapi in scripts/build_roms.sh.
 
 module purge
 

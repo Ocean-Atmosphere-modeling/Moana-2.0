@@ -17,5 +17,9 @@ romsO
 *.log
 slurm-*.out
 
-# Test run directories (tests/*/submit.sh)
+# Run directories (scripts/submit_run.sh)
 tests/*/run_*/
+Apps/*/run_*/
+
+# Figures made by scripts/plot_*.py (regenerate from a run directory)
+tests/*/results/

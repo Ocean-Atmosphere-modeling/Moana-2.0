@@ -1,0 +1,23 @@
+# Moana-2.0 Python environment for pre/post-processing and plotting.
+#
+# Create:  conda env create -f env/moana_python.yml
+# Use:     conda activate moana_python
+#
+# This file lists what we ask for. The exact versions that were installed
+# are in env/moana_python.lock.txt; to rebuild that environment exactly
+# (Linux x86-64, e.g. Amarel or AWS):
+#   conda create -n moana_python --file env/moana_python.lock.txt
+# After changing this file, recreate the environment and regenerate the lock:
+#   conda list -n moana_python --explicit > env/moana_python.lock.txt
+name: moana_python
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - xroms
+  - xarray
+  - netcdf4
+  - numpy
+  - matplotlib
+  - cmocean

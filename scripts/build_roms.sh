@@ -25,13 +25,9 @@
 #                                                                       :::
 # Usage:                                                                :::
 #                                                                       :::
-#    ./build_roms.sh [options]                                          :::
+#    scripts/build_roms.sh <app_dir> [options]                          :::
 #                                                                       :::
 # Options:                                                              :::
-#                                                                       :::
-#    -b          Compile a specific ROMS GitHub branch                  :::
-#                                                                       :::
-#                  build_roms.sh -j 10 -b feature/kernel                :::
 #                                                                       :::
 #    -g          Compile with debug flag (slower code)                  :::
 #                                                                       :::
@@ -51,20 +47,25 @@
 #                                                                       :::
 #    -noclean    Do not clean already compiled objects                  :::
 #                                                                       :::
-#    -app NAME   Build a stock ROMS test case (header in ROMS/Include)  :::
-#                  instead of MOANA, e.g. to check the toolchain:       :::
-#                                                                       :::
-#                  build_roms.sh -app UPWELLING -j 8                    :::
-#                                                                       :::
 # Notice that sometimes the parallel compilation fail to find MPI       :::
 # include file "mpif.h".                                                :::
 #                                                                       :::
-# The branch option -b is only possible for ROMS source code from       :::
-# https://github.com/myroms. Such versions are under development        :::
-# and targeted to advanced users, superusers, and beta testers.         :::
-# Regular and novice users must use the default 'develop' branch.       :::
-#                                                                       :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+# Moana-2.0: one build script shared by every application. <app_dir> is
+# the application folder (e.g. Apps/moana or tests/upwelling) holding the
+# <app>.h header; ROMS_APPLICATION is its name in capitals (moana -> MOANA)
+# unless ROMS_APPLICATION is already set. ROMS is always built from the
+# pinned "roms" submodule next to this script (the upstream -b <branch>
+# option was removed because it bypassed the pin). The build goes in the
+# directory this script is run from.
+
+if [ $# -lt 1 ] || [ ! -d "$1" ]; then
+  echo "Usage: $0 <app_dir> [options]"
+  exit 1
+fi
+APP_DIR_ARG=$1
+shift
 
 export which_MPI=oneapi                        # default, overwritten below
 
@@ -73,8 +74,6 @@ parallel=0
 pio_lib=0
 clean=1
 dprint=0
-branch=0
-app=
 
 command="build_roms.sh $@"
 
@@ -120,36 +119,12 @@ do
       clean=0
       ;;
 
-    -app )
-      shift
-      app=`echo $1 | grep -v '^-'`
-      if [ "$app" == "" ]; then
-        echo "Please enter a ROMS test case name, e.g. -app UPWELLING."
-        exit 1
-      fi
-      shift
-      ;;
-
-    -b )
-      shift
-      branch=1
-      branch_name=`echo $1 | grep -v '^-'`
-      if [ "$branch_name" == "" ]; then
-	echo "Please enter a ROMS GitHub branch name."
-	exit 1
-      fi
-      shift
-      ;;
-
     * )
       echo ""
       echo "${separator}"
       echo "$0 : Unknown option [ $1 ]"
       echo ""
       echo "Available Options:"
-      echo ""
-      echo "-b branch_name  Compile specific ROMS GitHub branch name"
-      echo "                  For example:  build_roms.sh -b feature/kernel"
       echo ""
       echo "-g              Compile with debugging flags, slower code"
       echo ""
@@ -163,9 +138,6 @@ do
       echo ""
       echo "-noclean        Do not clean already compiled objects"
       echo ""
-      echo "-app NAME       Build stock ROMS test case NAME instead of MOANA"
-      echo "                  For example:  build_roms.sh -app UPWELLING"
-      echo ""
       echo "${separator}"
       echo ""
       exit 1
@@ -177,9 +149,7 @@ done
 # determine the name of the ".h" header file with the application
 # CPP definitions.
 
-# Moana-2.0: "-app NAME" builds a stock ROMS test case instead (see below).
-
-export   ROMS_APPLICATION=${app:-MOANA}
+# Moana-2.0: set below from the application folder name.
 
 # Set a local environmental variable to define the path to the directories
 # where the ROMS source code is located (MY_ROOT_DIR), and this project's
@@ -188,12 +158,18 @@ export   ROMS_APPLICATION=${app:-MOANA}
 # script describing the location from where the ROMS source code was cloned
 # or downloaded, it uses that value.
 
-# Moana-2.0: MY_ROOT_DIR is the top of the Moana-2.0 repository (two levels
-# above this script), and the ROMS source is the "roms" git submodule there.
+# Moana-2.0: MY_PROJECT_DIR is the application folder given on the command
+# line (the .h header and any analytical files live there), and MY_ROOT_DIR
+# is the top of the Moana-2.0 repository (one level above this script),
+# where the "roms" submodule is. The build itself goes in the directory this
+# script is run from (BINDIR below), so application folders only ever hold
+# configuration.
 
-export        MY_ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+export     MY_PROJECT_DIR=$(cd "${APP_DIR_ARG}" && pwd)
 
-export     MY_PROJECT_DIR=${PWD}
+export        MY_ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
+export   ROMS_APPLICATION=${ROMS_APPLICATION:-$(basename "${MY_PROJECT_DIR}" | tr '[:lower:]' '[:upper:]')}
 
 # The path to the user's local current ROMS source code.
 #
@@ -330,18 +306,14 @@ fi
 # customized biology model header file (like fennel.h, nemuro.h, ecosim.h,
 # etc).
 
-# Moana-2.0: a stock test case (-app) uses the header and analytical
-# files distributed with ROMS, so leave both unset for it.
-
-if [ -z "$app" ]; then
  export     MY_HEADER_DIR=${MY_PROJECT_DIR}
 
  export MY_ANALYTICAL_DIR=${MY_PROJECT_DIR}
-fi
 
 # Put the binary to execute in the following directory.
+# Moana-2.0: the directory this script is run from (e.g. a run directory).
 
- export            BINDIR=${MY_PROJECT_DIR}
+ export            BINDIR=${PWD}
 
  echo ""
  echo "${separator}"
@@ -358,17 +330,17 @@ fi
 # with other projects.
 
 if [ -n "${USE_DEBUG:+1}" ]; then
- export         BUILD_DIR=${MY_PROJECT_DIR}/Build_romsG
+ export         BUILD_DIR=${BINDIR}/Build_romsG
  export             myBIN=${BINDIR}/romsG
 else
   if [ -n "${USE_OpenMP:+1}" ]; then
-    export      BUILD_DIR=${MY_PROJECT_DIR}/Build_romsO
+    export      BUILD_DIR=${BINDIR}/Build_romsO
     export          myBIN=${BINDIR}/romsO
   elif [ -n "${USE_MPI:+1}" ]; then
-    export      BUILD_DIR=${MY_PROJECT_DIR}/Build_romsM
+    export      BUILD_DIR=${BINDIR}/Build_romsM
     export          myBIN=${BINDIR}/romsM
   else
-    export      BUILD_DIR=${MY_PROJECT_DIR}/Build_roms
+    export      BUILD_DIR=${BINDIR}/Build_roms
     export          myBIN=${BINDIR}/romsS
   fi
 fi
@@ -390,36 +362,10 @@ fi
 # Go to the users source directory to compile. The options set above will
 # pick up the application-specific code from the appropriate place.
 
-if [ $branch -eq 1 ]; then
-
-  # Check out requested branch from ROMS GitHub.
-
-  if [ ! -d ${MY_PROJECT_DIR}/src ]; then
-    echo ""
-    echo "Downloading ROMS source code from GitHub: https://github.com/myroms"
-    echo ""
-    git clone https://github.com/myroms/roms.git src
-  fi
-  echo ""
-  echo "Checking out ROMS GitHub branch: $branch_name"
-  echo ""
-  cd src
-  git checkout $branch_name
-
-  # If we are using the COMPILERS from the ROMS source code
-  # overide the value set above
-
-  if [[ ${COMPILERS} == ${MY_ROMS_SRC}* ]]; then
-    export COMPILERS=${MY_PROJECT_DIR}/src/Compilers
-  fi
-  export MY_ROMS_SRC=${MY_PROJECT_DIR}/src
-
-else
-  echo ""
-  echo "Using ROMS source code from: ${MY_ROMS_SRC}"
-  echo ""
-  cd ${MY_ROMS_SRC}
-fi
+echo ""
+echo "Using ROMS source code from: ${MY_ROMS_SRC}"
+echo ""
+cd ${MY_ROMS_SRC}
 
 #--------------------------------------------------------------------------
 # Compile.
@@ -454,13 +400,9 @@ else
   echo "${separator}"
   echo "GNU Build script command:      ${command}"
   echo "ROMS source directory:         ${MY_ROMS_SRC}"
-  echo "ROMS header file:              ${MY_HEADER_DIR:-${MY_ROMS_SRC}/ROMS/Include}/${HEADER}"
+  echo "ROMS header file:              ${MY_HEADER_DIR}/${HEADER}"
   echo "ROMS build  directory:         ${BUILD_DIR}"
   echo "ROMS executable:               ${myBIN}"
-  if [ $branch -eq 1 ]; then
-    echo "ROMS downloaded from:          https://github.com/myroms/roms.git"
-    echo "ROMS compiled branch:          $branch_name"
-  fi
   echo "ROMS Application:              ${ROMS_APPLICATION}"
   FFLAGS=`make print-FFLAGS | cut -d " " -f 3-`
   echo "Fortran compiler:              ${FORT}"

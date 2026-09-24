@@ -1,0 +1,6 @@
+# Input data manifest for MOANA (checked by scripts/check_inputs.sh).
+# One tab-separated line per grid, initial, boundary, forcing or observation
+# file. path is absolute or relative to $MOANA_DATA. Get sha256 with
+# "sha256sum <file>". Commit every change to this file.
+#
+# sha256	path	source	version_or_date	made_by
