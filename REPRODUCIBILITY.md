@@ -147,7 +147,7 @@ Moana-2.0/
 ├── scripts/check_inputs.sh  checks input files against inputs.tsv
 ├── scripts/compare_energy.sh  regression check: energy vs. reference, within tolerance
 ├── scripts/plot_upwelling.py  figures from an UPWELLING test run
-├── tests/upwelling/       toolchain and regression test, template for a new application
+├── tests/upwelling/       toolchain and regression test (step-by-step guide in its README), template for a new application
 ├── .gitignore             keeps big/generated files (builds, *.nc) out of git
 └── .gitmodules            where the ROMS bookmark points
 ```
@@ -221,6 +221,9 @@ profiles) into `tests/upwelling/results/`:
 conda activate moana_python
 python scripts/plot_upwelling.py tests/upwelling/run_<date>_<time>
 ```
+
+[tests/upwelling/README.md](tests/upwelling/README.md) walks through the
+test step by step and shows what each figure should look like.
 
 ### Repeating an old run
 

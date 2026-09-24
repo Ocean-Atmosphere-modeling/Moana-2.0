@@ -20,6 +20,8 @@
 #   run_upwelling.slurm     this job: build, run, check
 #   submit.sh               submits this job (scripts/submit_run.sh)
 #   reference_energy.txt    expected energy diagnostics (regression check)
+#   reference_figures/      figures from the reference run (see README.md)
+#   README.md               how to run this test and what the results should look like
 #
 # Submit it with tests/upwelling/submit.sh. That writes the receipt on the
 # login node (compute nodes have no git), copies the code to
