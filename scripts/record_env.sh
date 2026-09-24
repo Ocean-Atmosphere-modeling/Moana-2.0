@@ -22,15 +22,20 @@ echo "user:  $(whoami)"
 echo "os:    $(uname -sr)"
 
 section "Git"
-echo "moana-2.0: $(git -C "$ROOT_DIR" rev-parse HEAD) ($(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD))"
-git -C "$ROOT_DIR" submodule status --recursive
-dirty=$(git -C "$ROOT_DIR" status --porcelain --ignore-submodules=none)
-if [ -n "$dirty" ]; then
-  echo "WARNING: uncommitted changes present:"
-  echo "$dirty"
-  # A "+" before a submodule commit above also means it differs from the pin.
-  git -C "$ROOT_DIR" submodule foreach --quiet \
-    'git status --porcelain | sed "s|^|  $sm_path: |"'
+if command -v git >/dev/null 2>&1; then
+  echo "moana-2.0: $(git -C "$ROOT_DIR" rev-parse HEAD) ($(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD))"
+  git -C "$ROOT_DIR" submodule status --recursive
+  dirty=$(git -C "$ROOT_DIR" status --porcelain --ignore-submodules=none)
+  if [ -n "$dirty" ]; then
+    echo "WARNING: uncommitted changes present:"
+    echo "$dirty"
+    # A "+" before a submodule commit above also means it differs from the pin.
+    git -C "$ROOT_DIR" submodule foreach --quiet \
+      'git status --porcelain | sed "s|^|  $sm_path: |"'
+  fi
+else
+  # e.g. Amarel compute nodes: record the code version on a login node.
+  echo "(git not available on this host; code version not recorded)"
 fi
 
 section "Loaded modules"

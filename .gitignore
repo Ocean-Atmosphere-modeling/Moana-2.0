@@ -16,3 +16,6 @@ romsO
 *.out
 *.log
 slurm-*.out
+
+# Test run directories (tests/*/submit.sh)
+tests/*/run_*/

@@ -43,6 +43,12 @@ Everything we write lives in `Apps/<application>/` (for example
 (for example `nco/5.3.9`, not just `nco`). Loading this file before working
 means everyone uses the same compiler and libraries.
 
+On Amarel the toolchain is Intel oneAPI 2025.3 (`ifx` compiler) with Intel
+MPI 2021.17 and NetCDF-C 4.10.0 / NetCDF-Fortran 4.6.3. These are the only
+NetCDF modules on Amarel, and they only load together with that compiler and
+MPI. `Apps/moana/build_roms.sh` is set to match (`FORT=ifx`,
+`which_MPI=oneapi`); if you change one, change the other.
+
 **4. Input data: not in git (yet)**
 
 NetCDF (`*.nc`) files are too large for git, so they are ignored. Record where
@@ -64,6 +70,7 @@ Moana-2.0/
 ├── Apps/moana/            our model configuration and build script
 ├── env/amarel.sh          the list of cluster modules to load
 ├── scripts/record_env.sh  writes the "receipt" for a build or run
+├── tests/upwelling/       toolchain check: builds and runs a stock ROMS case
 ├── .gitignore             keeps big/generated files (builds, *.nc) out of git
 └── .gitmodules            where the ROMS bookmark points
 ```
@@ -92,6 +99,21 @@ scripts/record_env.sh my_receipt.txt # write down what was used
 
 Check the receipt. If it says `WARNING: uncommitted changes present`,
 commit your changes first so the run can be traced back to saved code.
+
+### Check the toolchain works (UPWELLING test)
+
+Before building Moana, or after changing modules or the ROMS version, run
+the stock ROMS UPWELLING case. It needs no input data, so it only tests that
+the compiler, MPI and NetCDF work together with our ROMS version:
+
+```bash
+sbatch tests/upwelling/run_upwelling.slurm
+```
+
+The job builds ROMS, runs it on 4 MPI ranks, and ends with `PASS` or `FAIL`
+in its `slurm-<jobid>.out`. Everything it made (build log, ROMS log,
+receipt, NetCDF output) is in `tests/upwelling/run_<jobid>/`, which git
+ignores.
 
 ### Repeating an old run
 

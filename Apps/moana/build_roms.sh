@@ -51,6 +51,11 @@
 #                                                                       :::
 #    -noclean    Do not clean already compiled objects                  :::
 #                                                                       :::
+#    -app NAME   Build a stock ROMS test case (header in ROMS/Include)  :::
+#                  instead of MOANA, e.g. to check the toolchain:       :::
+#                                                                       :::
+#                  build_roms.sh -app UPWELLING -j 8                    :::
+#                                                                       :::
 # Notice that sometimes the parallel compilation fail to find MPI       :::
 # include file "mpif.h".                                                :::
 #                                                                       :::
@@ -61,7 +66,7 @@
 #                                                                       :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-export which_MPI=openmpi                       # default, overwritten below
+export which_MPI=oneapi                        # default, overwritten below
 
 g_flags=0
 parallel=0
@@ -69,6 +74,7 @@ pio_lib=0
 clean=1
 dprint=0
 branch=0
+app=
 
 command="build_roms.sh $@"
 
@@ -114,6 +120,16 @@ do
       clean=0
       ;;
 
+    -app )
+      shift
+      app=`echo $1 | grep -v '^-'`
+      if [ "$app" == "" ]; then
+        echo "Please enter a ROMS test case name, e.g. -app UPWELLING."
+        exit 1
+      fi
+      shift
+      ;;
+
     -b )
       shift
       branch=1
@@ -147,6 +163,9 @@ do
       echo ""
       echo "-noclean        Do not clean already compiled objects"
       echo ""
+      echo "-app NAME       Build stock ROMS test case NAME instead of MOANA"
+      echo "                  For example:  build_roms.sh -app UPWELLING"
+      echo ""
       echo "${separator}"
       echo ""
       exit 1
@@ -158,7 +177,9 @@ done
 # determine the name of the ".h" header file with the application
 # CPP definitions.
 
-export   ROMS_APPLICATION=MOANA
+# Moana-2.0: "-app NAME" builds a stock ROMS test case instead (see below).
+
+export   ROMS_APPLICATION=${app:-MOANA}
 
 # Set a local environmental variable to define the path to the directories
 # where the ROMS source code is located (MY_ROOT_DIR), and this project's
@@ -231,13 +252,15 @@ fi
 #export         which_MPI=mpich         # compile with MPICH library
 #export         which_MPI=mpich2        # compile with MPICH2 library
 #export         which_MPI=mvapich2      # compile with MVAPICH2 library
-#export         which_MPI=oneapi        # compile with mpiifx library
- export         which_MPI=openmpi       # compile with OpenMPI library
+ export         which_MPI=oneapi        # compile with mpiifx library
+#export         which_MPI=openmpi       # compile with OpenMPI library
 
 #export        USE_OpenMP=on            # shared-memory parallelism
 
-#export              FORT=ifx
- export              FORT=ifort
+# Moana-2.0: must match the toolchain loaded by env/<machine>.sh.
+
+ export              FORT=ifx
+#export              FORT=ifort
 #export              FORT=gfortran
 #export              FORT=pgi
 
@@ -307,9 +330,14 @@ fi
 # customized biology model header file (like fennel.h, nemuro.h, ecosim.h,
 # etc).
 
+# Moana-2.0: a stock test case (-app) uses the header and analytical
+# files distributed with ROMS, so leave both unset for it.
+
+if [ -z "$app" ]; then
  export     MY_HEADER_DIR=${MY_PROJECT_DIR}
 
  export MY_ANALYTICAL_DIR=${MY_PROJECT_DIR}
+fi
 
 # Put the binary to execute in the following directory.
 
@@ -426,7 +454,7 @@ else
   echo "${separator}"
   echo "GNU Build script command:      ${command}"
   echo "ROMS source directory:         ${MY_ROMS_SRC}"
-  echo "ROMS header file:              ${MY_HEADER_DIR}/${HEADER}"
+  echo "ROMS header file:              ${MY_HEADER_DIR:-${MY_ROMS_SRC}/ROMS/Include}/${HEADER}"
   echo "ROMS build  directory:         ${BUILD_DIR}"
   echo "ROMS executable:               ${myBIN}"
   if [ $branch -eq 1 ]; then
