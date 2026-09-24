@@ -1,0 +1,2 @@
+## This is an attempt at making a .gitignore so roms doesn't try to push all the time ##
+roms
