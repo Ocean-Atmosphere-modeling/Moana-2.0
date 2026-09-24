@@ -11,9 +11,10 @@ Moana Project:
   - New Zealand has one of the largest ocean territories, but has very little coastal ocean data
   - The project developed a small temperature sensor which can be attached to commerical fishing gear, so fisheries can collect nearshore data
   - In addition to creating an observational device, this section collects and arranges historical and near real-time temperature and salinity observations
-
-- test
-  - test
+- Modelling component is "Ngā Ripo o Te Moana - Whirlpools of the Ocean" which aims to create hindcasts, forecasts, and particle tracking models
+  - Hydrodynamic modelling estimates currents, salinity, temperature, and water levels with observations from Te Tiro Moana
+  - New Zealand-scale model as a base with high-resolution models of the Bay of Plenty, Hauraki Gulf, and Kaikoura
+  - Incorporating machine learning to advance marine heatwave forecasting and mitigate fisheries impacts
 
 Formal website is available at [Moana Project Website](https://www.moanaproject.org/).
 
