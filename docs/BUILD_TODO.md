@@ -15,9 +15,9 @@ together, so reading the list top to bottom also explains how the model works.
 
 ROMS solves the ocean equations on a grid. It knows nothing about New Zealand
 until we give it files that describe **where** (grid), **what it starts
-from** (initial conditions), **what pushes it** (atmosphere, tides, rivers,
+from** (initial conditions), **what drives it** (atmosphere, tides, rivers,
 open-ocean boundaries) and **how to compute** (compile options and run
-parameters). Everything else is checking that the answer is realistic.
+parameters). Everything else is checking that the solution to the governing equation is physical.
 
 ```
                  ┌──────────────── HOW TO COMPUTE ─────────────────┐
@@ -33,7 +33,7 @@ parameters). Everything else is checking that the answer is realistic.
  START FROM                           │      │
  ini.nc   (T, S, u, v, ζ on 1 Jan) ──▶│      │           │
                                       │      │           ▼
- WHAT PUSHES IT                       │      │      EVALUATION
+ WHAT DRIVES IT                       │      │      EVALUATION
  bry.nc   GLORYS T,S,u,v,ζ at edges ─▶│      │      vs satellites (SSH, SST),
  nudging coefficients (sponge)     ──▶│      │      profiles (CORA), tide gauges,
  tide.nc  TPXO 11 constituents     ──▶│      │      coastal thermometers,
