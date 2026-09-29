@@ -5,7 +5,7 @@ Adding data assimilation to an ocean model for the New Zealand region in a priva
 Moana Project:
 - Moana (Māori word for "ocean")
 - 5 year coastal initiative project designed to improve understanding of New Zealand's coastal ocean circulation, and support it's seafood industry and surrounding marine ecosystem health
-  - Key focus areas: marine heatwaves (increasing in frequency and intensity), larval tracking (essential to sustainably m    anage seafood), ocean circulation, storm surges, and coastal flooding
+  - Key focus areas: marine heatwaves (increasing in frequency and intensity), larval tracking (essential to sustainably manage seafood), ocean circulation, storm surges, and coastal flooding
   - Goals: produce hindcasts, forecasts, and particle tracking models of the region 
 - Observational component is the "Te Tiro Moana – Eyes on the Ocean" which aims to (1) use affordable technology to get more observations of the coastal ocean, and (2) make existing observations available to everyone
   - New Zealand has one of the largest ocean territories, but has very little coastal ocean data
