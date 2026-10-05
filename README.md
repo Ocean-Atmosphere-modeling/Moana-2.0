@@ -11,3 +11,6 @@ source env/amarel.sh
 
 See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for how this repository is set
 up so model runs can be reproduced, and how to reproduce one.
+
+Project documentation (brief, roadmap, decisions, data sources) starts at
+[docs/README.md](docs/README.md).

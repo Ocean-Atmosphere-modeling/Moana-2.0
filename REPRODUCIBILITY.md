@@ -48,8 +48,11 @@ Every application folder has the same files, named after the application:
 | `inputs.tsv` | the input data manifest (see 4 below); not needed if there are no input files |
 
 `tests/upwelling/` is a complete, working example of this layout.
-(`Apps/moana/` has only `blueprint.yaml` and `inputs.tsv` so far; its `.h`,
-`.in` and job files are still to be written.) To set up a new application (another
+(`Apps/moana/` has only `blueprint.yaml` and `inputs.tsv` in git so far; its
+`.h`, `.in` and job files are still to be written. Unmodified copies of the
+published `roms3d.h`, `roms.in` and `roms_config.sh` may sit beside them as
+references; they are not committed, see
+[docs/reference/model-config.md](docs/reference/model-config.md).) To set up a new application (another
 region, or a Moana variant), copy it and change those files. The folder name
 is the application name: `scripts/build_roms.sh Apps/moana` builds
 `ROMS_APPLICATION=MOANA` from `Apps/moana/moana.h`.
@@ -210,6 +213,7 @@ Moana-2.0/
 ├── CITATION.cff           how to cite this repository
 ├── scripts/compare_energy.sh  regression check: energy vs. reference, within tolerance
 ├── scripts/plot_upwelling.py  figures from an UPWELLING test run
+├── docs/                  project docs: start at docs/README.md (brief, roadmap, decisions, reference)
 ├── tests/upwelling/       toolchain and regression test (step-by-step guide in its README), template for a new application
 ├── .gitignore             keeps big/generated files (builds, *.nc) out of git
 └── .gitmodules            where the ROMS bookmark points

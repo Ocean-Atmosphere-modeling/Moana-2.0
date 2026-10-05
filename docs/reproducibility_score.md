@@ -19,7 +19,7 @@ scored 13.
 | 6 | Run scripts and restart chaining | 2 | `scripts/submit_run.sh --segments N`; chaining, executable and restart checks in `tests/upwelling/run_upwelling.slurm` |
 | 7 | Tests or CI that check answers | 2 | `.github/workflows/upwelling.yml` runs `scripts/ci_upwelling.sh`: regression test and restart test against `tests/upwelling/reference_energy_gfortran.txt`; the same tests on Amarel with `tests/upwelling/submit.sh` |
 | 8 | Per-run record of code and settings | 2 | `receipt.txt`, `receipt_node.txt`, `blueprint.lock.yaml`, `executable.sha256`, `seg_NN/restart.sha256` in every run directory; `scripts/verify_run.sh` checks them |
-| 9 | Documentation an outsider can follow | 2 | `REPRODUCIBILITY.md`, `tests/upwelling/README.md`, `docs/BUILD_TODO.md` |
+| 9 | Documentation an outsider can follow | 2 | `REPRODUCIBILITY.md`, `tests/upwelling/README.md`, `docs/README.md` and the docs it links |
 | 10 | Licence and citable release | 1 | `LICENSE`, `CITATION.cff`. No tagged release or DOI yet |
 | | **Total** | **18** | |
 
@@ -30,8 +30,8 @@ scored 13.
   [REPRODUCIBILITY.md](../REPRODUCIBILITY.md). This needs a push and a
   GitHub-side setting, so it is done by a person, not a script.
 - **Criterion 3 (one point):** scripts that build the grid, the initial and
-  boundary files and the forcing files (Phases 1 and 3 to 6 of
-  [BUILD_TODO.md](BUILD_TODO.md)). This is the project's own work; the score
+  boundary files and the forcing files (milestones P1-M1 and P1-M3 to
+  P1-M6 of the [roadmap](01-roadmap.md)). This is the project's own work; the score
   moves when those scripts are committed and listed in the `made_by` column
   of `inputs.tsv`.
 

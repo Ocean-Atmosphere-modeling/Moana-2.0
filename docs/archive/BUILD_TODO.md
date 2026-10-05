@@ -1,7 +1,9 @@
+> **Archived 2026-10-05.** Replaced by the [roadmap](../01-roadmap.md). Kept unchanged except for link paths; the [traceability table](../01-roadmap.md#traceability-old-todo-list--new-home) shows where each item went.
+
 # Building the Moana model: step-by-step to-do list
 
 This is the work plan for rebuilding the **Moana Ocean Hindcast** configuration
-(Souza et al., 2023; [markdown copy](hindcast_paper/MoanaHindcast.md)) in this
+(Souza et al., 2023; [markdown copy](../hindcast_paper/MoanaHindcast.md)) in this
 repository. Each numbered task below is written to become **one GitHub
 issue**: it says what the component does in the model, what to do, what it
 produces and how we know it is done.
@@ -83,7 +85,7 @@ parameters). Everything else is checking that the solution to the governing equa
   `good first issue`.
 - Each issue should end with **"Done when"** so it can be closed objectively,
   and new input files must be added to `Apps/moana/inputs.tsv` (sha256,
-  source, version, script that made it; see [REPRODUCIBILITY.md](../REPRODUCIBILITY.md)).
+  source, version, script that made it; see [REPRODUCIBILITY.md](../../REPRODUCIBILITY.md)).
 
 Tasks marked ✅ are already done in this repository.
 

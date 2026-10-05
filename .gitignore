@@ -23,3 +23,10 @@ Apps/*/run_*/
 
 # Figures made by scripts/plot_*.py (regenerate from a run directory)
 tests/*/results/
+
+# Published Moana configuration (Zenodo 10.5281/zenodo.6484908): reference
+# copies only. The archive has no licence, so they are fetched with
+# scripts/fetch_published_config.sh, never committed (docs/risks.md, R12).
+Apps/moana/roms.in
+Apps/moana/roms3d.h
+Apps/moana/roms_config.sh

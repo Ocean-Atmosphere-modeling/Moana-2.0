@@ -14,12 +14,12 @@ code:
     commit: 57aecf589a408b1e5490d2db7f9bd0196062a44e    # must equal the roms/ submodule pin
 
 compile_time:
-  header: moana.h                 # CPP options (docs/BUILD_TODO.md task 2.1, not written yet)
+  header: moana.h                 # CPP options (docs/01-roadmap.md P1-M2-T01, not written yet)
   chained_cpp_flags: -DPERFECT_RESTART    # added when the run has more than one segment
 
 run_time:
-  input: roms_moana.in            # run parameters (task 2.2, not written yet)
-  job: run_moana.slurm            # build, run, check (task 2.2, not written yet)
+  input: roms_moana.in            # run parameters (P1-M2-T02, not written yet)
+  job: run_moana.slurm            # build, run, check (P1-M2-T03, not written yet)
 
 inputs:
   manifest: inputs.tsv            # sha256, path, source, version, script for every input file
