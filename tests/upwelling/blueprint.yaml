@@ -1,0 +1,38 @@
+# Blueprint: everything that defines this application, in one file.
+# Checked by scripts/check_blueprint.sh every time a run is submitted (and by
+# the automated test), so it cannot drift from the files it points to.
+# Format: "key: value" lines, two spaces per level, no lists.
+
+schema_version: 1
+name: upwelling
+description: Stock ROMS UPWELLING case; toolchain, regression and restart test
+state: validated                  # draft (not yet compared with anything) | validated
+
+code:
+  roms:
+    location: https://github.com/myroms/roms.git
+    commit: 57aecf589a408b1e5490d2db7f9bd0196062a44e    # must equal the roms/ submodule pin
+
+compile_time:
+  header: upwelling.h             # CPP options
+  chained_cpp_flags: -DPERFECT_RESTART    # added when the run has more than one segment
+
+run_time:
+  input: roms_upwelling.in        # run parameters
+  job: run_upwelling.slurm        # build, run, check
+
+inputs:
+  manifest: none                  # grid, initial conditions and forcing are analytical
+
+run:
+  segments: 1                     # default; "submit.sh --segments 2" is the restart test
+
+test:
+  reference:
+    ifx: reference_energy.txt
+    gfortran: reference_energy_gfortran.txt
+  # Tolerance for the restart test. An imperfect restart (this case chained
+  # without PERFECT_RESTART) moves kinetic energy by only 4e-7, less than
+  # the regression tolerance in the reference files, so a chained run must
+  # match in every printed digit.
+  restart_rtol: 0

@@ -34,12 +34,19 @@ with output every 6 hours.
 
 | File | What it is |
 |---|---|
+| `blueprint.yaml` | what defines this application, in one file (checked on every submit) |
 | `upwelling.h` | CPP options: which physics ROMS compiles in |
 | `roms_upwelling.in` | run parameters: grid size, time step, tiling (2 × 2), output |
 | `run_upwelling.slurm` | the job: build, run, check against the reference |
 | `submit.sh` | submits the job (via `scripts/submit_run.sh`) |
-| `reference_energy.txt` | expected energy diagnostics, and the tolerance |
+| `reference_energy.txt` | expected energy diagnostics, and the tolerance (Intel `ifx`, Amarel) |
+| `reference_energy_gfortran.txt` | the same for gfortran (the automated test on GitHub) |
 | `reference_figures/` | the figures below, from the reference run |
+
+The same job also runs as a restart test: `tests/upwelling/submit.sh
+--segments 2` runs the case as two chained jobs and requires the whole
+chain to match the single-run reference. See "Check a restart does not
+change the answer" in [REPRODUCIBILITY.md](../../REPRODUCIBILITY.md).
 
 ## Step by step
 
@@ -122,7 +129,9 @@ passed, they should look the same as the reference figures.
 tests/upwelling/run_<date>_<time>/
 ├── src/                 the exact code the job built and ran (repository + ROMS)
 ├── receipt.txt          commits, modules, conda environment, checksums (login node)
-├── receipt_node.txt     compiler flags, tiling, node, regression check (compute node)
+├── blueprint.lock.yaml  the same facts for scripts (read by scripts/verify_run.sh)
+├── receipt_node.txt     executable sha256, compiler flags, tiling, node, regression check (compute node)
+├── executable.sha256    sha256 of the executable the job built
 ├── slurm-<jobid>.out    PASS or FAIL
 ├── build.log, roms.log  build and model logs
 ├── energy.txt           the energy printout that was compared

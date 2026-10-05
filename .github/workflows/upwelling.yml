@@ -1,0 +1,55 @@
+# Automated test: on every push and pull request, build the pinned ROMS with
+# the GNU toolchain locked in env/ci_gfortran.lock.txt and run
+# scripts/ci_upwelling.sh:
+#   - blueprint check (tests/upwelling/blueprint.yaml matches the files);
+#   - regression test (UPWELLING energy vs. tests/upwelling/reference_energy_gfortran.txt);
+#   - restart test (two chained segments must match the same reference).
+# The Amarel toolchain (Intel ifx) is tested on Amarel with tests/upwelling/submit.sh.
+name: UPWELLING test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  upwelling:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check blueprints and input manifests
+        run: |
+          for bp in $(git ls-files '*/blueprint.yaml'); do
+            echo "== ${bp}"
+            scripts/check_blueprint.sh "$(dirname "${bp}")"
+          done
+
+      - name: Install the locked GNU toolchain
+        run: |
+          if [ ! -x "${CONDA:-}/bin/conda" ]; then
+            curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/2.0.5 | tar -xj -C "${RUNNER_TEMP}" bin/micromamba
+            "${RUNNER_TEMP}/bin/micromamba" create --yes --quiet --prefix "${RUNNER_TEMP}/moana_ci" --file env/ci_gfortran.lock.txt
+          else
+            "${CONDA}/bin/conda" create --yes --quiet --prefix "${RUNNER_TEMP}/moana_ci" --file env/ci_gfortran.lock.txt
+          fi
+          echo "${RUNNER_TEMP}/moana_ci/bin" >> "${GITHUB_PATH}"
+
+      - name: Regression and restart tests
+        run: scripts/ci_upwelling.sh
+
+      - name: Keep logs and energy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upwelling-run
+          path: |
+            tests/upwelling/run_ci/**/build.log
+            tests/upwelling/run_ci/**/roms.log
+            tests/upwelling/run_ci/**/energy.txt
+            tests/upwelling/run_ci/**/compare.txt
+            tests/upwelling/run_ci/**/receipt_node.txt
+            tests/upwelling/run_ci/**/*.sha256

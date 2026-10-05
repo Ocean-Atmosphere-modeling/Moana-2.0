@@ -51,11 +51,11 @@ parameters). Everything else is checking that the solution to the governing equa
 | B | Bathymetry + land mask | in `moana_grd.nc` | GEBCO + NZ charts/surveys | 2.1 |
 | C | Vertical grid | parameters in `.in` | — (designed) | 2.1 |
 | D | Physics / numerics options | `moana.h`, `roms_moana.in` | — | 2.1 |
-| E | Initial conditions | `moana_ini.nc` | GLORYS12v1 | 2.1–2.2 |
-| F | Open boundary conditions | `moana_bry.nc` (+ nudging file) | GLORYS12v1 / Mercator nowcast | 2.1–2.2 |
+| E | Initial conditions | `moana_ini.nc` | GLORYS12v1, fetched through Oceanum Datamesh | 2.1–2.2 |
+| F | Open boundary conditions | `moana_bry.nc` (+ nudging file) | GLORYS12v1 / Mercator nowcast, fetched through Oceanum Datamesh | 2.1–2.2 |
 | G | Tides | `moana_tide.nc` | TPXO 7.8.1 (11 constituents) | 2.3 |
 | H | Atmospheric forcing | `moana_frc_*.nc` | CFSR (NCAR) | 2.1, 2.3 |
-| I | Rivers | `moana_rivers.nc` | data.govt.nz (42 rivers, climatology) | 2.1 |
+| I | Rivers | `moana_rivers.nc` | data.govt.nz / MfE reach flow statistics (42 rivers, climatology; see 6.1) | 2.1 |
 | J | Runs (spin-up + production) | job scripts, restarts | — | 2.1 |
 | K | Evaluation | analysis scripts, figures | CMEMS, OISST, CORA5.2, LINZ, NIWA | 2.4, 3 |
 
@@ -103,7 +103,7 @@ energy.
 **Why:** the authors published their exact ROMS source and configuration
 files (Zenodo [10.5281/zenodo.6484908](https://doi.org/10.5281/zenodo.6484908)).
 Starting from them avoids guessing dozens of settings.
-- [ ] Download the Zenodo archive; store it outside git (or under `docs/reference_config/` if small) and record its checksum.
+- [x] Download the Zenodo archive, store it outside git and record its checksum: `scripts/fetch_published_config.sh` (the grid is listed in `Apps/moana/inputs.tsv`). The archive holds only the grid, `roms.in`, `roms3d.h` and `roms_config.sh`; its `roms_src/` folder is empty and the nudging file is missing, so those must be requested from the authors.
 - [ ] List every CPP option in their `.h` and every non-default parameter in their `.in` in a table (`docs/reference_config.md`).
 - [ ] Note which input files they used and how they were made (scripts included?).
 
@@ -123,7 +123,7 @@ reference config cannot be copied blindly.
 **Why:** 28 years of 5 km forcing, boundaries and hourly output is several TB.
 - [ ] Choose `$MOANA_DATA` location(s) on Amarel (scratch vs project space), quotas, backup.
 - [ ] Estimate sizes: GLORYS subset, CFSR subset, outputs (hourly + daily, 28 years).
-- [ ] Set up accounts: Copernicus Marine (GLORYS, SSH, CORA), NCAR RDA (CFSR), TPXO licence.
+- [ ] Set up accounts: Oceanum Datamesh token (GLORYS for initial and boundary conditions, see 3.1), Copernicus Marine (SSH, CORA for evaluation), NCAR RDA (CFSR), TPXO licence.
 
 **Done when:** storage paths are in `env/amarel.sh` / README and accounts exist.
 
@@ -210,14 +210,22 @@ names and output frequencies.
 
 ---
 
-## Phase 3: Start from / edges: initial and boundary conditions (GLORYS)
+## Phase 3: Start from / edges: initial and boundary conditions (GLORYS via Datamesh)
 
-### 3.1 Download GLORYS12v1 and Mercator nowcasts `data` `boundary`
+### 3.1 Fetch GLORYS12v1 and Mercator nowcasts through Datamesh `data` `boundary`
 **Why:** the open ocean outside the domain drives the large currents (EAUC,
 Tasman Front, ACC branch). GLORYS was the best of four global reanalyses for NZ
-(Souza et al., 2020).
-- [ ] Daily T, S, u, v, ζ for the domain + margin, 1993–2020 (GLORYS reanalysis to its end date, then operational analysis/nowcast; check current CMEMS product IDs).
-- [ ] Download script in `scripts/`; record versions in manifest.
+(Souza et al., 2020). We fetch it through
+[Oceanum Datamesh](https://docs.oceanum.io/docs/category/datamesh/index.html)
+(Python package `oceanum`) instead of downloading from Copernicus Marine
+directly: one query returns the domain subset as an xarray dataset.
+- [ ] Get a Datamesh token and keep it in the `DATAMESH_TOKEN` environment variable (never in git, job scripts or receipts).
+- [ ] Add `oceanum` to `env/moana_python.yml` and regenerate the lock file.
+- [ ] Find the Datamesh datasource IDs for the GLORYS12v1 reanalysis and for the operational analysis/nowcast that continues it; check each against the CMEMS product it mirrors (product ID, version, time coverage, variables).
+- [ ] Query daily T, S, u, v, ζ for the domain + margin, 1993–2020 (geofilter = bounding box, timefilter in chunks, e.g. one month per query) and write the subsets to `$MOANA_DATA`.
+- [ ] Fetch script in `scripts/`; for every file record in `inputs.tsv` the datasource ID, the query (variables, geofilter, timefilter), the `oceanum` version and the fetch date, because a Datamesh datasource can be updated in place.
+
+**Done when:** the full 1993–2020 subset is on disk, listed in `inputs.tsv`, and a spot check of one day matches the same field from Copernicus Marine. *Depends on 0.5.*
 
 ### 3.2 Initial conditions `boundary`
 - [ ] Interpolate GLORYS 1993-01-01 to the grid (horizontal, then vertical onto s-levels); adjust for mask; compute ubar/vbar consistently.
@@ -288,14 +296,33 @@ check the reference config for how they joined them.
 ### 6.1 River discharge climatology `rivers` `data`
 **Why:** freshwater changes coastal density (e.g. Waihou and Piako rivers in
 the Firth of Thames / Hauraki Gulf).
-- [ ] Get flows for the 42 rivers from data.govt.nz (or NIWA), build a monthly (or daily) climatology.
-- [ ] Assign each river mouth to a grid cell edge and direction; set river T and S (S = 0, T from climatology or air temperature).
 
-**Output:** `moana_rivers.nc`. *Depends on 1.3.*
+**What is known.** The paper only says the 42 rivers are "climatological
+values obtained from the data.govt.nz portal" (§2.1); it names no dataset and
+no river list. The reference config (0.3) reads them from
+`nz5km_N50_rivers.nc` with `LuvSrc == T` and `LtracerSrc == T T`, but that
+file is not in the Zenodo archive or the GitHub repository. So which rivers,
+where their mouths sit on the grid, and whether "climatological" means annual
+mean or monthly are all unknown.
+
+- [ ] Ask the corresponding author (J. M. A. C. Souza) for `nz5km_N50_rivers.nc`; it is the only thing that settles the three unknowns above. Also look for a forcing folder on the Moana THREDDS server.
+- [ ] If the file is not available, rebuild from the Ministry for the Environment table [Natural river flow statistics, predicted for all river reaches](https://data.mfe.govt.nz/table/52536-natural-river-flow-statistics-predicted-for-all-river-reaches/) (listed on [data.govt.nz](https://catalogue.data.govt.nz/dataset/natural-river-flow-statistics-predicted-for-all-river-reaches), so the closest match to the paper's wording): keep the reaches that end at the coast, rank by mean flow, take the 42 largest. Hadfield and Stevens (2021) did the same for Cook Strait (17 largest rivers, annual means).
+- [ ] Cross-check the ranking against the MfE [River flows](https://data.mfe.govt.nz/layer/53309-river-flows/) layer and NIWA [NZ River Maps](https://shiny.niwa.co.nz/nzrivermaps/).
+- [ ] Decide annual mean or monthly climatology. The reach statistics may only give an annual mean; a seasonal cycle would then have to come from gauge records (see 6.2).
+- [ ] Assign each river mouth to a grid cell edge and direction; set river T and S (S = 0, T from climatology or air temperature) and the vertical distribution of the flow.
+- [ ] Record the dataset, its version and the river list in `inputs.tsv` and in a short table (`docs/rivers.md`).
+
+These portals block scripted access, so download by hand in a browser and
+record the date.
+
+**Output:** `moana_rivers.nc`. **Done when:** the 42 rivers are mapped on the grid and their total mean discharge is documented. *Depends on 1.3.*
 
 ### 6.2 (Later, improvement) Time-varying river flows `rivers`
 The paper's conclusions name this as an improvement: inter-annual flow changes
-can matter more than the seasonal cycle.
+can matter more than the seasonal cycle. Candidate sources:
+- [CAMELS-NZ](https://doi.org/10.26021/canterburynz.28827644) (Canterbury; described in [ESSD 17, 5745, 2025](https://essd.copernicus.org/articles/17/5745/2025/)): hourly streamflow at 369 gauged catchments, 1972–2024, CC-BY 4.0 (14 stations need the provider's permission). Gauges are upstream of the mouths, so flows need scaling to the coast with the reach mean flows from 6.1.
+- [NIWA hydrometric station data](https://data.niwa.co.nz/products/hydro-data): daily observed flows; needs a DataHub login and API key.
+- NIWA TopNet / NZ Water Model: modelled hourly flow for every reach back to 1972; no public download, request from NIWA.
 
 ---
 
@@ -396,7 +423,7 @@ P0 foundations ─┬─▶ 1.1 grid ─▶ 1.2 bathy ─▶ 1.3 mask ─┐
                 │                                       ├─▶ 1.5 smoothing (PGE) ─┐
                 ├─▶ 2.1 moana.h ─▶ 2.2 roms_moana.in ──┘   + 1.4 vertical       │
                 │                                                                ▼
-                ├─▶ 3.1 GLORYS ──────────────────────────▶ 3.2 ini, 3.3 bry, 3.4 nudging
+                ├─▶ 3.1 GLORYS (Datamesh) ───────────────▶ 3.2 ini, 3.3 bry, 3.4 nudging
                 ├─▶ 4.1 TPXO ─────────────────────────────▶ 4.2 tides-only test
                 ├─▶ 5.1 CFSR ─────────────────────────────▶ 5.2 forcing, 5.3 IB check
                 └─▶ 6.1 rivers

@@ -4,3 +4,4 @@
 # "sha256sum <file>". Commit every change to this file.
 #
 # sha256	path	source	version_or_date	made_by
+4209188ebea9bbbfa42e70c1a77642aba6b0a095376deb59d0ed4e0387efccc1	published/moana_hindcast_v1.0/nz5km_grd.nc	https://doi.org/10.5281/zenodo.6484908 (published Moana grid, Souza 2022)	v1.0	scripts/fetch_published_config.sh

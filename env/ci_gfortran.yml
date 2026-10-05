@@ -1,0 +1,26 @@
+# Moana-2.0 GNU toolchain for the automated UPWELLING test (GitHub Actions).
+#
+# The Amarel toolchain (env/amarel.sh: Intel ifx + Intel MPI) is not
+# available on GitHub's machines, so the automated test builds ROMS with
+# gfortran + MPICH from conda-forge instead. It has its own reference,
+# tests/upwelling/reference_energy_gfortran.txt (one reference per compiler).
+#
+# Create:  conda env create -f env/ci_gfortran.yml
+# Use:     conda activate moana_ci && source env/ci.sh
+#
+# This file lists what we ask for. The exact versions that were installed
+# are in env/ci_gfortran.lock.txt, which is what GitHub Actions installs:
+#   conda create -n moana_ci --file env/ci_gfortran.lock.txt
+# After changing this file, recreate the environment, regenerate the lock:
+#   conda list -n moana_ci --explicit > env/ci_gfortran.lock.txt
+# then rerun the test (scripts/ci_upwelling.sh) and update the reference.
+name: moana_ci
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - gfortran
+  - mpich
+  - netcdf-fortran=*=nompi_*
+  - make
+  - perl

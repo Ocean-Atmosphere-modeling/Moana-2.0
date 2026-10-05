@@ -29,7 +29,12 @@ section "Git"
 if command -v git >/dev/null 2>&1 \
    && [ "$(git -C "$ROOT_DIR" rev-parse --show-toplevel 2>/dev/null)" = "$ROOT_DIR" ]; then
   echo "moana-2.0: $(git -C "$ROOT_DIR" rev-parse HEAD) ($(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD))"
-  git -C "$ROOT_DIR" submodule status --recursive
+  # Drop the label "submodule status" appends: it comes from plain
+  # "git describe", which skips lightweight tags (upstream ROMS tags roms-4.x
+  # are lightweight, so it reported roms-3.7-...). Print our own with --tags.
+  git -C "$ROOT_DIR" submodule status --recursive | sed 's/ (.*)$//'
+  git -C "$ROOT_DIR" submodule foreach --quiet --recursive \
+    'echo "  $sm_path version: $(git describe --tags --always)"'
   dirty=$(git -C "$ROOT_DIR" status --porcelain --ignore-submodules=none)
   if [ -n "$dirty" ]; then
     echo "WARNING: uncommitted changes present:"

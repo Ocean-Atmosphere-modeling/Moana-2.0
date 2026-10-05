@@ -1,0 +1,48 @@
+# How to cite this repository. GitHub shows a "Cite this repository" button
+# from this file, and Zenodo reads it when a release is archived.
+# Check the author list (names, affiliations, ORCID iDs) before the first
+# release, and update "version" and "date-released" with every release.
+cff-version: 1.2.0
+message: "If you use this configuration or its workflow, please cite it as below."
+title: "Moana-2.0: a reproducible ROMS configuration for the New Zealand region"
+abstract: >-
+  Configuration, build and run workflow for rebuilding the Moana Ocean
+  Hindcast (5 km ROMS, New Zealand) and adding data assimilation, with the
+  ROMS source, software environment, input data and every run recorded so
+  results can be reproduced.
+type: software
+authors:
+  - family-names: Shekhar
+    given-names: Suman
+repository-code: "https://github.com/Ocean-Atmosphere-modeling/Moana-2.0"
+license: MIT
+version: 0.1.0
+date-released: "2026-10-01"
+keywords:
+  - ROMS
+  - ocean modelling
+  - New Zealand
+  - hindcast
+  - reproducibility
+references:
+  - type: article
+    title: "Moana Ocean Hindcast - a > 25-year simulation for New Zealand waters using the Regional Ocean Modeling System (ROMS) v3.9 model"
+    authors:
+      - family-names: "Azevedo Correia de Souza"
+        given-names: "Joao Marcos"
+      - family-names: Suanda
+        given-names: "Sutara H."
+      - family-names: Couto
+        given-names: "Phellipe P."
+      - family-names: Smith
+        given-names: "Robert O."
+      - family-names: Kerry
+        given-names: Colette
+      - family-names: Roughan
+        given-names: Moninya
+    journal: "Geoscientific Model Development"
+    volume: 16
+    start: 211
+    end: 231
+    year: 2023
+    doi: 10.5194/gmd-16-211-2023

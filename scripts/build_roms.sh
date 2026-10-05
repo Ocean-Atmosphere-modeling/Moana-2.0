@@ -67,7 +67,7 @@ fi
 APP_DIR_ARG=$1
 shift
 
-export which_MPI=oneapi                        # default, overwritten below
+export which_MPI=${MOANA_MPI:-oneapi}          # default, overwritten below
 
 g_flags=0
 parallel=0
@@ -79,7 +79,10 @@ command="build_roms.sh $@"
 
 separator=`perl -e "print '<>' x 50;"`
 
-export MY_CPP_FLAGS=
+# Moana-2.0: extra CPP options for a variant of an application without
+# editing its header, e.g. MOANA_CPP_FLAGS=-DPERFECT_RESTART for a chained
+# run. They are printed in the build summary ("Added CPP Options").
+export MY_CPP_FLAGS=${MOANA_CPP_FLAGS:-}
 
 while [ $# -gt 0 ]
 do
@@ -228,14 +231,16 @@ fi
 #export         which_MPI=mpich         # compile with MPICH library
 #export         which_MPI=mpich2        # compile with MPICH2 library
 #export         which_MPI=mvapich2      # compile with MVAPICH2 library
- export         which_MPI=oneapi        # compile with mpiifx library
+ export         which_MPI=${MOANA_MPI:-oneapi}   # compile with mpiifx library
 #export         which_MPI=openmpi       # compile with OpenMPI library
 
 #export        USE_OpenMP=on            # shared-memory parallelism
 
-# Moana-2.0: must match the toolchain loaded by env/<machine>.sh.
+# Moana-2.0: must match the toolchain loaded by env/<machine>.sh, which
+# sets MOANA_FORT and MOANA_MPI (ifx + oneapi on Amarel, the default here;
+# gfortran + mpich for the automated test, env/ci.sh).
 
- export              FORT=ifx
+ export              FORT=${MOANA_FORT:-ifx}
 #export              FORT=ifort
 #export              FORT=gfortran
 #export              FORT=pgi
