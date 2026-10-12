@@ -15,3 +15,7 @@ Moana Project:
 Formal website is available at [Moana Project Website](https://www.moanaproject.org/).
 
 [![Watch the video](https://video.squarespace-cdn.com/content/v1/5fc42b2e3d7b346e5e153624/275bcb1c-15d3-4500-86c5-87d288dda9c2/thumbnail)](https://www.moanaproject.org/project-overview)
+
+Moana Model overview-
+\
+![Moana Grid](https://github.com/Ocean-Atmosphere-modeling/Moana-2.0/blob/suman/Apps/moana/Figures/moana_grid.png?review=true)
