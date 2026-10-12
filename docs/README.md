@@ -1,38 +1,48 @@
-# Moana 2.0: Start here
+# Moana 2.0
 
-> A reproducible 5 km ROMS forward model of New Zealand waters, rebuilt from the published Moana hindcast, to be the background model for ROMS 4D-Var. Built with Oceanum as commercial partner.
+**Last updated:** 2026-10-09
 
-**Last updated:** 2026-10-05
+## What this project does
 
-## Status at a glance
-| Phase | Goal | Status | Target date | Exit criteria met |
-|---|---|---|---|---|
-| P1 | Forward model: 5 km, 40 levels, pinned ROMS 4.x; statistics checked against the published hindcast | 🔄 | (yet to decide) | 0/5 |
-| P2 | ROMS 4D-Var on the forward model | 🔲 | (yet to decide) | (criteria yet to decide) |
+We run the ROMS ocean model for New Zealand waters on a 5 km grid.
+We start from the Moana model configuration ([paper](hindcast_paper/MoanaHindcast.md)).
+We use input data from Oceanum DataMesh only ([decision D1](decisions.md#d1-use-datamesh-data-only)).
+The goal is one forward model run. A forward model run has no data assimilation.
+Oceanum is the commercial partner.
 
-P1 progress: M0 Foundations 3/10 tasks done; M1 Grid 1/4 done (published
-grid adopted); M2–M9 not started. Details: [roadmap](01-roadmap.md).
+## Status
 
-## Next three actions
-| Task ID | Action | Owner | Blocked by |
-|---|---|---|---|
-| P1-M0-T06 | Ask the authors for the nudging file, rivers file, `roms_src/` and input scripts | (yet to decide) | — |
-| P1-M0-T08 | Choose `$MOANA_DATA`, set it in `env/amarel.sh`, move the grid there | (yet to decide) | — |
-| P1-M1-T03 | Choose `THETA_S`, `THETA_B`, `TCLINE` for the 40-level grid | (yet to decide) | — |
-
-## Where to find things
-| I want to… | Go to |
+| Milestone | Status |
 |---|---|
-| Understand why this project exists | [Brief](00-brief.md) |
-| See what's planned and what's done | [Roadmap](01-roadmap.md) |
-| Understand how the system fits together | [Architecture](02-architecture.md) |
-| Know why we chose X | [Decisions](decisions/) |
-| Run something | [How-to guides](how-to/) |
-| Look up a dataset, parameter, or path | [Reference](reference/) |
-| Understand the background | [Explanation](explanation/) |
-| Find a past model run | [Run log](experiments/run-log.md) |
-| See what's risky or undecided | [Risks](risks.md) |
-| See what changed recently | [Devlog](devlog.md) |
-| Reproduce a run | [REPRODUCIBILITY.md](../REPRODUCIBILITY.md) |
-| Read the original paper | [Moana hindcast (markdown)](hindcast_paper/MoanaHindcast.md) |
-| See the old todo list | [Archive](archive/BUILD_TODO.md) |
+| M1 Data access | 🔄 |
+| M2 Grid | 🔲 |
+| M3 Model setup | 🔲 |
+| M4 Ocean initial and boundary files | 🔲 |
+| M5 Tides | 🔲 |
+| M6 Atmosphere | ⛔ |
+| M7 Rivers | 🔲 |
+| M8 Test runs | 🔲 |
+| M9 Forward run | 🔲 |
+| M10 Check the results | 🔲 |
+
+🔲 not started · 🔄 in progress · ⛔ blocked · ✅ done. The tasks are in the [roadmap](roadmap.md).
+
+## Next actions
+
+| Task | Action | Owner |
+|---|---|---|
+| M1-T2 | Send the [request list](data.md#requests-to-oceanum) to Oceanum. | (yet to decide) |
+| M2-T1 | Select the grid. | (yet to decide) |
+| M9-T1 | Select the run period. It must start on or after 2022-06-01. | (yet to decide) |
+
+## Pages
+
+| Page | Content |
+|---|---|
+| [roadmap.md](roadmap.md) | Milestones, tasks and open questions |
+| [data.md](data.md) | Data on DataMesh, data that we need, requests to Oceanum |
+| [decisions.md](decisions.md) | Decisions and the reasons for them |
+| [runs.md](runs.md) | Model runs |
+| [devlog.md](devlog.md) | Work log, by date |
+| [hindcast_paper/MoanaHindcast.md](hindcast_paper/MoanaHindcast.md) | The Moana hindcast paper (Souza et al., 2023) |
+| [../REPRODUCIBILITY.md](../REPRODUCIBILITY.md) | How we make runs that other people can do again |

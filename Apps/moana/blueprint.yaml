@@ -5,7 +5,7 @@
 
 schema_version: 1
 name: moana
-description: Moana Ocean Hindcast rebuild, 5 km New Zealand, 1993-2020 (Souza et al., 2023)
+description: Moana ROMS forward model, 5 km New Zealand, DataMesh inputs only (docs/decisions.md D1, D2)
 state: draft                      # draft (not yet compared with anything) | validated
 
 code:
@@ -14,7 +14,7 @@ code:
     commit: 57aecf589a408b1e5490d2db7f9bd0196062a44e    # must equal the roms/ submodule pin
 
 compile_time:
-  header: moana.h                 # CPP options (docs/01-roadmap.md P1-M2-T01, not written yet)
+  header: moana.h                 # CPP options (docs/roadmap.md M3-T1)
   chained_cpp_flags: -DPERFECT_RESTART    # added when the run has more than one segment
 
 run_time:

@@ -1,25 +1,21 @@
 # Devlog
 
-Dated session notes, newest first. Dates before 2026-10-05 are reconstructed
-from git history.
+Add new entries at the top. Use the date of the work.
 
-### 2026-10-05
-- **Did:** Moved the published configuration (`roms.in`, `roms3d.h`, `roms_config.sh`, `nz5km_grd.nc`) into `Apps/moana/`; started `Moana_grid.ipynb` (replaces `Moana.ipynb`). Replaced the todo list with this docs set; old list archived. Git-ignored the published reference copies in `Apps/moana/`; added `CLAUDE.md` with the docs-maintenance rules.
-- **Decided:** The published hindcast is a statistical benchmark and maybe an initial-condition source, not a target to reproduce; run period yet to decide (→ [ADR-0006](decisions/0006-published-hindcast-as-benchmark.md)). ROMS 4.x over 3.9 (→ [ADR-0005](decisions/0005-roms-version.md)). Reuse the published grid (→ [ADR-0002](decisions/0002-start-from-published-moana-config.md)); 40 vertical levels (→ [ADR-0003](decisions/0003-use-40-vertical-levels.md)); forward model first, then ROMS 4D-Var, no JEDI (→ [ADR-0004](decisions/0004-forward-model-first-then-4dvar.md)).
-- **Blocked:** —
-- **Next:** P1-M0-T06 (ask authors for missing files), P1-M0-T08 (`$MOANA_DATA`), P1-M1-T02/T03 (mask review, stretching parameters).
+## 2026-10-09
 
-### 2026-10-01
-- **Did:** Blueprints and `check_blueprint.sh`; segment chains with executable and restart checksums; `verify_run.sh`; GitHub Actions CI with a gfortran reference; `CITATION.cff`; `fetch_published_config.sh`; reproducibility scorecard (18/20). UPWELLING regression and restart tests PASS.
-
-### 2026-09-29
-- **Did:** Added the hindcast paper (markdown + figures) and the build todo list.
-
-### 2026-09-24
-- **Did:** Frozen code copies per run, input manifest, tolerance-based regression check, UPWELLING guide with reference figures.
-
-### 2026-09-23
-- **Did:** Pinned ROMS as a submodule; module environment; oneAPI/ifx toolchain on Amarel; first UPWELLING test; reproducibility guide.
-
-### 2026-09-17
-- **Did:** Repository created.
+- **Changed goal:** We do not copy the Moana paper and its data. We run the Moana model with Oceanum DataMesh data only ([D1](decisions.md#d1-use-datamesh-data-only)). The roadmap covers the forward model only ([D2](decisions.md#d2-forward-model-only)).
+- **Did:**
+  - Found the data that the DataMesh token can read. The results are in [data.md](data.md).
+  - Wrote `scripts/check_datamesh.py`. It makes the data.md tables again.
+  - Deleted all old docs, but not `docs/hindcast_paper/`. We did not commit the old docs first. Six uncommitted edits and two untracked decision records are lost.
+  - Wrote new docs in ASD-STE100 ([D3](decisions.md#d3-simple-docs-in-asd-ste100)).
+  - Changed the links to old docs pages in `CLAUDE.md`, `README.md`, `REPRODUCIBILITY.md`, `.gitignore`, `Apps/moana/blueprint.yaml` and `Apps/moana/python_scripts/plot_grid.py`.
+- **Found:**
+  - The ocean data (T, S, u, v every 6 hours, ζ every hour) is on DataMesh from 2022-06-01. The 3D currents are new since 2026-10-07.
+  - ERA5 wind and pressure are on DataMesh. ERA5 air temperature and rain stop on 2025-05-01. The catalogue says 2026-08-01.
+  - ERA5 short-wave stops on 2020-01-01. ERA5 humidity and long-wave are not on DataMesh.
+  - DataMesh has no river data.
+- **Blocked:** M6 Atmosphere. We need requests 1–4 in [data.md](data.md#requests-to-oceanum).
+- **Next:** Send the request list to Oceanum (M1-T2).
+- **Not changed:** The old download scripts (`scripts/fetch_glorys.py`, `fetch_cfsv2.sh`, `subset_cfsv2.py`, `fetch_camels_nz.sh`) and the data on disk. They are not part of the DataMesh-only plan.

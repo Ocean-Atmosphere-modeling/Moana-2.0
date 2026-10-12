@@ -51,8 +51,7 @@ Every application folder has the same files, named after the application:
 (`Apps/moana/` has only `blueprint.yaml` and `inputs.tsv` in git so far; its
 `.h`, `.in` and job files are still to be written. Unmodified copies of the
 published `roms3d.h`, `roms.in` and `roms_config.sh` may sit beside them as
-references; they are not committed, see
-[docs/reference/model-config.md](docs/reference/model-config.md).) To set up a new application (another
+references; they are not committed.) To set up a new application (another
 region, or a Moana variant), copy it and change those files. The folder name
 is the application name: `scripts/build_roms.sh Apps/moana` builds
 `ROMS_APPLICATION=MOANA` from `Apps/moana/moana.h`.
@@ -213,7 +212,7 @@ Moana-2.0/
 ├── CITATION.cff           how to cite this repository
 ├── scripts/compare_energy.sh  regression check: energy vs. reference, within tolerance
 ├── scripts/plot_upwelling.py  figures from an UPWELLING test run
-├── docs/                  project docs: start at docs/README.md (brief, roadmap, decisions, reference)
+├── docs/                  project docs: start at docs/README.md (roadmap, data, decisions, runs, devlog)
 ├── tests/upwelling/       toolchain and regression test (step-by-step guide in its README), template for a new application
 ├── .gitignore             keeps big/generated files (builds, *.nc) out of git
 └── .gitmodules            where the ROMS bookmark points
@@ -386,10 +385,6 @@ from a tagged release, so the code behind it has a name and a DOI:
 
 Run receipts record the commit, so any run made from a tagged commit can be
 cited by its release.
-
-How this repository scores against other ocean-model repositories, and the
-file that backs each point, is in
-[docs/reproducibility_score.md](docs/reproducibility_score.md).
 
 ## Simple rules
 

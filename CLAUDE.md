@@ -6,7 +6,10 @@ reproducible is in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 ## Docs maintenance
 At the end of any session that changes code, configs, or plans:
 - Add a dated entry to `docs/devlog.md`.
-- Update task status in `docs/01-roadmap.md` and the "Status at a glance" table in `docs/README.md`.
-- If a model run was made, add a row to `docs/experiments/run-log.md`.
-- If a significant choice was made, draft an ADR in `docs/decisions/` with status `Proposed`.
-- Never invent facts; use `❓ UNKNOWN` and ask. In `docs/01-roadmap.md`, write `(yet to decide)` for anything not decided or not clear yet.
+- Update task status in `docs/roadmap.md` and the "Status" table in `docs/README.md`.
+- If a model run was made, add a row to `docs/runs.md`.
+- If a significant choice was made, add an entry to `docs/decisions.md` with status `Proposed`.
+- If DataMesh access changes, run `scripts/check_datamesh.py` and update `docs/data.md`.
+- Never invent facts; use `❓ UNKNOWN` and ask. In `docs/roadmap.md`, write `(yet to decide)` for anything not decided or not clear yet.
+- Keep the docs simple. Write them in ASD-STE100 Simplified Technical English (rules in `docs/decisions.md`, D3).
+- Do not change `docs/hindcast_paper/`.
