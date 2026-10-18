@@ -1,12 +1,57 @@
-jobs:
-  - name: ic
-    datasource: cmems_mod_glo_phy_anfc_0.083deg_P1D-m
-    variables: [zos, thetao, so, uo, vo]
-    start: 2025-01-01
-    period: 1D          # start .. start+1d, all steps kept -> initial condition
+# This yaml is under construction so ask Suman or Nikki on how to use this properly! 
+# jobs:
+# name: ic
 
-  - name: bry
-    datasource: cmems_mod_glo_phy_anfc_0.083deg_P1D-m
-    variables: [zos, thetao, so, uo, vo]
-    start: 2025-01-01
-    period: 31D         # start .. start+31d, all steps kept
+# DATASOURCE: cmems_mod_glo_phy-cur_anfc_0-083deg_pt6h-i
+# VARIABLES: [uo, vo]
+# VAR_NAME: uo_vo
+# DATE: 2025-01-01
+# OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
+# PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
+# GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
+
+
+
+# name: ic
+
+# DATASOURCE: cmems_mod_glo_phy-so_anfc_0-083deg_pt6h-i
+# VARIABLES: [so]
+# VAR_NAME: so
+# DATE: 2025-01-01
+# OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
+# PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
+# GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
+
+
+
+# name: ic
+
+# DATASOURCE: cmems_mod_glo_phy-thetao_anfc_0-083deg_pt6h-i
+# VARIABLES: [thetao]
+# VAR_NAME: thetao
+# DATE: 2025-01-01
+# OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
+# PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
+# GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
+
+
+
+
+# name: ic
+
+# DATASOURCE: cmems_mod_glo_phy_anfc_0-083deg_pt1h-m
+# VARIABLES: [zos]
+# VAR_NAME: zos
+# DATE: 2025-01-01
+# OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
+# PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
+# GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
+
+  # - name: bry
+  #   DATASOURCE: cmems_mod_glo_phy_anfc_0.083deg_P1D-m
+  #   VARIABLES: [zos, thetao, so, uo, vo]
+  #   VAR_NAME: uo_vo
+  #   DATE: 2025-01-01
+  #   OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
+  #   PERIOD: 31D         # start .. start+31d, all steps kept
+  #   GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX

@@ -27,17 +27,7 @@ import xarray as xr
 from oceanum.datamesh import Connector
 
 # ----------------------------------------------------------------- settings
-DATASOURCE = "cmems_mod_glo_phy-cur_anfc_0-083deg_pt6h-i"                     # find it with --list
-DATE = "2025-01-01"                                                           # model start date
-OUTPUT_DIR = Path("/projects/f_omg_1/moa/moana/oceanum_input/initial_cond")   # where the file goes
-GRID = "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
 NZ_BBOX = [160.0, -52.0, 185.0, -30.0]     # x_min, y_min, x_max, y_max (used only if GRID is None)
-DAY = 1                                                              # number of "days" you want data to download
-# Variables to download, in the datasource's own names.
-# GLORYS / Copernicus:  zos = sea level, thetao = temperature, so = salinity, uo / vo = 3D velocity
-# If the datasource uses ROMS names, change to ["zeta", "temp", "salt", "u", "v"].
-#VARIABLES = ["zos", "thetao", "so", "uo", "vo"]   # for IC and BC we need all ["zeta", "temp", "salt", "u", "v"]
-VARIABLES = ["uo", "vo"]
 # ------------------------------------------------------------------------
 
 
@@ -50,30 +40,34 @@ def bbox_from_grid(path, pad=0.5):
 
 def main():
     
+    
     dm = Connector()  # token from DATAMESH_TOKEN
     print("Connected to Oceanum Datamesh successfully :)")
 
+    cfg = yaml.safe_load(open('/scratch/ss4338/Project/Moana-2.0/download_input.yaml'))
+    print('Reading configuration yaml file')
+
     if "--list" in sys.argv:
         for term in ("glorys", "mercator", "moana", "ocean hindcast"):
-            for ds in dm.get_catalog(search=term, timefilter=[DATE, DATE]):
+            for ds in dm.get_catalog(search=term, timefilter=[cfg['DATE'], cfg['DATE']]):
                 print(f"{ds.id:50s} {ds.name}")
         return
 
-    bbox = bbox_from_grid(GRID) if GRID else NZ_BBOX
-    t0 = pd.Timestamp(DATE)
-    print(f"datasource={DATASOURCE}, bbox={bbox}, time=[{t0}, +1 day)")
+    bbox = bbox_from_grid(cfg['GRID']) if cfg.get('GRID') else NZ_BBOX
+    t0 = pd.Timestamp(cfg['DATE'])
+    print(f"datasource={cfg['DATASOURCE']}, bbox={bbox}, time=[{t0}, +1 day)")
 
     ds = dm.query(
-        datasource=DATASOURCE,
-        variables=VARIABLES,
+        datasource=cfg['DATASOURCE'],
+        variables=cfg['VARIABLES'],
         geofilter={"type": "bbox", "geom": bbox},
-        timefilter={"type": "range", "times": [t0, t0 + pd.Timedelta(days=DAY)]},
+        timefilter={"type": "range", "times": [t0, t0 + pd.Timedelta(cfg['PERIOD'])]},
     )
     # ds = ds.isel(time=0)  # first field at or after DATE
     print(ds)
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUTPUT_DIR / f"ic_raw_{DATE}.nc"
+    
+    out = Path(cfg['OUTPUT_DIR']) / f"{cfg['name']}_{cfg['VAR_NAME']}_raw_{cfg['DATE']}.nc"
     ds.to_netcdf(out)
     print(f"Yayyyy wrote {out}")
 
