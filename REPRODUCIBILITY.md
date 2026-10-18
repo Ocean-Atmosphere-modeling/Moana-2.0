@@ -45,6 +45,7 @@ Every application folder has the same files, named after the application:
 | `<app>.h` | CPP options: which physics and features ROMS compiles in |
 | `roms_<app>.in` | run parameters: grid size, time step, tiling, file names |
 | `run_<app>.slurm` | the job: build, run, check |
+| `params.yaml` | model parameters: grid, vertical levels, time; `scripts/check_params.py <app_dir>` compares it with the `.in` file and the grid file; not needed if there is no grid file |
 | `inputs.tsv` | the input data manifest (see 4 below); not needed if there are no input files |
 
 `tests/upwelling/` is a complete, working example of this layout.
@@ -66,8 +67,8 @@ normally a run directory, so application folders only hold configuration.
 **The blueprint: one file that says what the application is**
 
 `<app>/blueprint.yaml` names everything that defines the application: the
-ROMS commit, the CPP header, the `.in` file, the job script, the input data
-manifest, how many segments a run has, and the test references. It is short
+ROMS commit, the CPP header, the `.in` file, the job script, the model
+parameters, the input data manifest, how many segments a run has, and the test references. It is short
 enough to read in a minute, and it is the first file to open in any
 application folder. (The idea is borrowed from the C-Star blueprints.)
 

@@ -17,15 +17,16 @@ Panels:
   b  horizontal grid spacing against latitude (the grid is Mercator, so the
      spacing depends on latitude only)
   c  Cook Strait at native resolution (one quadrilateral per rho-cell)
-  d  zonal section of the 40 terrain-following levels (Vtransform = 2) along
-     SECTION_LAT. The s-levels use Cs_w and hc stored in the grid file;
-     THETA_S, THETA_B and TCLINE for the model are not chosen yet
-     (docs/roadmap.md, M2-T2).
+  d  zonal section of the 40 terrain-following levels (Vtransform = 2,
+     Vstretching = VSTRETCHING) along SECTION_LAT. The s-levels use N,
+     theta_s, theta_b and hc from the grid file in the equations of
+     ROMS/Utility/set_scoord.F; THETA_S, THETA_B and TCLINE for the model
+     are not chosen yet (docs/roadmap.md, M2-T2).
 
 Every number on the figure is read from the grid file, except Vtransform = 2
-(the file has no Vtransform; the value is not chosen yet, docs/roadmap.md,
-M2-T2). Coastline and land are the model's own mask, not an external
-coastline.
+and Vstretching = 4 (the file has neither; the grid file's own Cs_w is from
+Vstretching = 5, and the values are not chosen yet, docs/roadmap.md, M2-T2).
+Coastline and land are the model's own mask, not an external coastline.
 """
 
 import argparse
@@ -54,6 +55,7 @@ HALO = [patheffects.withStroke(linewidth=1.6, foreground="white")]
 
 MESH_EVERY = 20          # draw every 20th grid line in panel a
 SECTION_LAT = -40.0      # latitude of the panel d section
+VSTRETCHING = 4          # s-level stretching function in panel d (4 or 5)
 ZOOM_LON = (173.6, 175.6)  # Cook Strait (panel c); north edge fits the axes
 ZOOM_LAT0 = -42.4
 ISOBATHS = (200, 2000)   # m, as in the hindcast paper's Fig. 1
@@ -154,7 +156,8 @@ def load_grid(path):
     ds = xr.open_dataset(path)
     g = {k: ds[k].values for k in (
         "h", "mask_rho", "pm", "pn", "lon_rho", "lat_rho",
-        "lon_vert", "lat_vert", "visc_factor", "diff_factor", "s_w", "Cs_w")}
+        "lon_vert", "lat_vert", "visc_factor", "diff_factor")}
+    g["N"] = ds["s_w"].size - 1
     g["hc"] = float(ds.hc)
     g["theta_s"], g["theta_b"] = float(ds.theta_s), float(ds.theta_b)
     g["Tcline"] = float(ds.Tcline)
@@ -164,6 +167,25 @@ def load_grid(path):
     g["y_vert"] = merc(g["lat_vert"])
     g["y_rho"] = merc(g["lat_rho"])
     return g
+
+
+def s_coord(N, theta_s, theta_b, vstretching):
+    """s_w and Cs_w at the N + 1 w-levels (ROMS/Utility/set_scoord.F).
+    Vstretching 4 and 5 have the same C(s); 5 has finer s near the top
+    and bottom."""
+    k = np.arange(N + 1.0)
+    if vstretching == 4:
+        s = (k - N) / N
+    elif vstretching == 5:
+        s = (-(k * k - 2 * k * N + k + N * N - N) / (N * N - N)
+             - 0.01 * (k * k - k * N) / (1 - N))
+    else:
+        raise ValueError(f"Vstretching {vstretching}: only 4 or 5")
+    C = ((1 - np.cosh(theta_s * s)) / (np.cosh(theta_s) - 1) if theta_s > 0
+         else -s ** 2)
+    if theta_b > 0:
+        C = (np.exp(theta_b * C) - 1) / (1 - np.exp(-theta_b))
+    return s, C
 
 
 def z_w(h, hc, s_w, Cs_w):
@@ -300,11 +322,21 @@ def panel_zoom(ax, g, norm, cmap, zoom):
             fontsize=6, ha="left", va="bottom")
 
 
-def panel_section(ax, g, j):
+def grid_levels(g):
+    """Vertical parameters of panel d: the grid file's, with VSTRETCHING."""
+    return {"N": g["N"], "Vstretching": VSTRETCHING, "theta_s": g["theta_s"],
+            "theta_b": g["theta_b"], "hc": g["hc"]}
+
+
+def panel_section(ax, g, j, v=None, note="grid-file values, not yet final"):
+    """w-levels along row j for the vertical parameters v (default
+    grid_levels(g)). Vtransform = 2, so hc = Tcline."""
+    v = v or grid_levels(g)
     lon = g["lon_rho"][j, :]
     h = g["h"][j, :]
     ocean = g["ocean"][j, :]
-    z = z_w(h, g["hc"], g["s_w"], g["Cs_w"])
+    s_w, Cs_w = s_coord(v["N"], v["theta_s"], v["theta_b"], v["Vstretching"])
+    z = z_w(h, v["hc"], s_w, Cs_w)
     z[:, ~ocean] = np.nan
     floor = 6200
     # Depth on a square-root axis so the near-surface levels are visible.
@@ -326,9 +358,9 @@ def panel_section(ax, g, j):
         ax.spines[s].set_visible(False)
     ax.text(0.995, 0.05,
             f"{lat_label(round(float(g['lat_rho'][j, 0]), 1))};  "
-            f"N = {z.shape[0] - 1}, Vtransform = 2, hc = {g['hc']:g} m, "
-            f"θs = {g['theta_s']:g}, θb = {g['theta_b']:g} "
-            "(grid-file values, not yet final)",
+            f"N = {v['N']}, Vtransform = 2, "
+            f"Vstretching = {v['Vstretching']}, hc = Tcline = {v['hc']:g} m, "
+            f"θs = {v['theta_s']:g}, θb = {v['theta_b']:g} ({note})",
             transform=ax.transAxes, ha="right", va="bottom", fontsize=6,
             color=INK)
 

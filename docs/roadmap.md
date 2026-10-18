@@ -1,6 +1,6 @@
 # Roadmap
 
-**Last updated:** 2026-10-09
+**Last updated:** 2026-10-16
 
 This roadmap is for the forward model only ([decision D2](decisions.md#d2-forward-model-only)).
 All input data comes from Oceanum DataMesh ([decision D1](decisions.md#d1-use-datamesh-data-only)).
@@ -11,6 +11,7 @@ Rules:
 - Status: 🔲 not started · 🔄 in progress · ⛔ blocked · ✅ done · 🗑️ dropped.
 - "(yet to decide)" shows a choice that nobody has made.
 - Each input file gets one line in `Apps/moana/inputs.tsv` (sha256, source, version, script).
+- The grid, vertical-level and time parameters are in `Apps/moana/params.yaml`. `scripts/check_params.py Apps/moana` compares them with `moana.in` and the grid file.
 
 ## M1 Data access
 
@@ -25,8 +26,8 @@ Rules:
 
 | ID | Task | Owner | Status | Done when |
 |---|---|---|---|---|
-| M2-T1 | Select the grid: `Apps/moana/Input/moana_grid.nc` (397 × 467 points, 40 levels), or a new grid from `gebco_2026` on DataMesh: (yet to decide). | (yet to decide) | 🔲 | The grid file is in `inputs.tsv`. |
-| M2-T2 | Set the vertical levels (number of levels, `THETA_S`, `THETA_B`, `TCLINE`): (yet to decide). | (yet to decide) | 🔲 | The values are in the `.in` file and the grid file. |
+| M2-T1 | Select the grid: `Apps/moana/Input/moana_grid.nc` (397 × 467 points, 40 levels), or a new grid from `gebco_2026` on DataMesh: (yet to decide). | (yet to decide) | 🔲 | The grid file is in `inputs.tsv`. `grid` in `params.yaml` has `status: decided`. |
+| M2-T2 | Set the vertical levels (number of levels, `Vstretching`, `THETA_S`, `THETA_B`, `TCLINE`): (yet to decide). `moana.in` and the grid file use Vstretching 5. The grid figure uses Vstretching 4. `moana_slevels` compares it with a trial (Vstretching 4, θs = 7, θb = 2, Tcline = 250 m). Write the values in `params.yaml`. | (yet to decide) | 🔲 | The values are in `params.yaml`, the `.in` file and the grid file. `scripts/check_params.py Apps/moana` shows no TODO or DIFFER for `vertical`. |
 
 ## M3 Model setup
 
@@ -45,7 +46,18 @@ Source: CMEMS GLOBAL_ANALYSISFORECAST_PHY_001_024 on DataMesh ([data.md](data.md
 | M4-T1 | Write a script that gets T, S, u, v and ζ for the domain and run period. Record the datasource ID, query, `oceanum` version and cache hash. | (yet to decide) | 🔲 | The files are in `inputs.tsv`. |
 | M4-T2 | Make the initial file. | (yet to decide) | 🔲 | The file is in `inputs.tsv`. A plot shows the fields. |
 | M4-T3 | Make the boundary files. | (yet to decide) | 🔲 | The files are in `inputs.tsv`. A plot shows the four edges. |
-| M4-T4 | Make the climatology and nudging files. Use nudging or not: (yet to decide). | (yet to decide) | 🔲 | The files are in `inputs.tsv`, or the task is dropped. |
+| M4-T4 | Make the climatology and nudging files. Use nudging or not: (yet to decide). `moana.in` nudges now, but no climatology or nudging file exists. | (yet to decide) | 🔲 | The files are in `inputs.tsv`, or the task is dropped. |
+
+## On-disk inputs ([D4](decisions.md#d4-make-roms-input-files-from-the-data-on-disk), Proposed)
+
+Script: `scripts/make_roms_inputs.py`. Data: `/projects/f_omg_1/moa/moana/Input`.
+
+| ID | Task | Owner | Status | Done when |
+|---|---|---|---|---|
+| D4-T1 | Write the script for the initial, boundary, forcing and river files. | Suman | ✅ 2026-10-12 | The script makes each file type. |
+| D4-T2 | Get the GLORYS12 edges with all levels (`scripts/fetch_glorys.py --edges`, without `--surface`). | (yet to decide) | 🔲 | `bry` makes the boundary file. |
+| D4-T3 | Make the files for the run period. Add them to `inputs.tsv`. | (yet to decide) | 🔲 | The files are in `inputs.tsv`. |
+| D4-T4 | Change `moana.in`: `DSTART`, `NRREC`, `LtracerSrc == F T`, file names, climatology and nudging switches. | (yet to decide) | 🔲 | ROMS reads the files with no error. |
 
 ## M5 Tides
 

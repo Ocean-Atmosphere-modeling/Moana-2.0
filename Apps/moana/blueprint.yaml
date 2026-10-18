@@ -20,6 +20,7 @@ compile_time:
 run_time:
   input: roms_moana.in            # run parameters (P1-M2-T02, not written yet)
   job: run_moana.slurm            # build, run, check (P1-M2-T03, not written yet)
+  parameters: params.yaml         # grid, vertical levels, time (scripts/check_params.py)
 
 inputs:
   manifest: inputs.tsv            # sha256, path, source, version, script for every input file

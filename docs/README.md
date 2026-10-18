@@ -1,6 +1,6 @@
 # Moana 2.0
 
-**Last updated:** 2026-10-09
+**Last updated:** 2026-10-16
 
 ## What this project does
 
@@ -24,6 +24,7 @@ Oceanum is the commercial partner.
 | M8 Test runs | 🔲 |
 | M9 Forward run | 🔲 |
 | M10 Check the results | 🔲 |
+| On-disk inputs ([D4](decisions.md#d4-make-roms-input-files-from-the-data-on-disk), Proposed) | 🔄 |
 
 🔲 not started · 🔄 in progress · ⛔ blocked · ✅ done. The tasks are in the [roadmap](roadmap.md).
 

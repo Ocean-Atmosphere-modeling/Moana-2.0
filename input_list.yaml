@@ -1,0 +1,144 @@
+cpp_options:
+- ADD_FSOBC
+- ADD_M2OBC
+- ANA_BSFLUX
+- ANA_BTFLUX
+- ANA_DQDSST
+- ATM_PRESS
+- AVERAGES
+- BULK_FLUXES
+- CURVGRID
+- DJ_GRADPS
+- EMINUSP
+- KANTHA_CLAYSON
+- LONGWAVE_OUT
+- MASKING
+- MIX_ISO_TS
+- MIX_S_UV
+- MY25_MIXING
+- N2S2_HORAVG
+- NONLIN_EOS
+- NO_LBC_ATT
+- PRESS_COMPENSATE
+- PROFILE
+- RADIATION_2D
+- RI_SPLINES
+- SALINITY
+- SOLAR_SOURCE
+- SOLVE3D
+- SPHERICAL
+- SPLINES_VDIFF
+- SPLINES_VVISC
+- SSH_TIDES
+- TS_C4VADVECTION
+- TS_DIF2
+- TS_U3HADVECTION
+- UV_ADV
+- UV_COR
+- UV_QDRAG
+- UV_TIDES
+- UV_VIS2
+required_inputs:
+  grid (GRDNAME):
+  - spherical
+  - xl
+  - el
+  - h
+  - f
+  - pm
+  - pn
+  - angle
+  - lon_rho
+  - lat_rho
+  - lon_u
+  - lat_u
+  - lon_v
+  - lat_v
+  - lon_psi
+  - lat_psi
+  - mask_rho
+  - mask_u
+  - mask_v
+  - mask_psi
+  - dndx
+  - dmde
+  initial (ININAME):
+  - ocean_time
+  - zeta
+  - ubar
+  - vbar
+  - u
+  - v
+  - temp
+  - salt
+  boundary (BRYNAME):
+    bry_time: or per-field *_time
+    west:
+    - zeta_west
+    - ubar_west
+    - vbar_west
+    - u_west
+    - v_west
+    - temp_west
+    - salt_west
+    south:
+    - zeta_south
+    - ubar_south
+    - vbar_south
+    - u_south
+    - v_south
+    - temp_south
+    - salt_south
+    east:
+    - zeta_east
+    - ubar_east
+    - vbar_east
+    - u_east
+    - v_east
+    - temp_east
+    - salt_east
+    north:
+    - zeta_north
+    - ubar_north
+    - vbar_north
+    - u_north
+    - v_north
+    - temp_north
+    - salt_north
+  forcing (FRCNAME):
+  - Uwind
+  - Vwind
+  - Pair
+  - Tair
+  - Qair
+  - rain
+  - swrad
+  - lwrad_down
+  tides (TIDENAME):
+  - tide_period
+  - tide_Ephase
+  - tide_Eamp
+  - tide_Cphase
+  - tide_Cangle
+  - tide_Cmin
+  - tide_Cmax
+  climatology (CLMNAME):
+  - ocean_time
+  - u
+  - v
+  - temp
+  - salt
+  nudging (NUDNAME):
+  - M3_NudgeCoef
+  - temp_NudgeCoef
+  - salt_NudgeCoef
+  rivers (SSFNAME):
+  - river
+  - river_time
+  - river_Xposition
+  - river_Eposition
+  - river_direction
+  - river_Vshape
+  - river_transport
+  - river_temp
+  - river_salt

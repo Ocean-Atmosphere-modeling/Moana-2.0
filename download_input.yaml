@@ -1,0 +1,12 @@
+jobs:
+  - name: ic
+    datasource: cmems_mod_glo_phy_anfc_0.083deg_P1D-m
+    variables: [zos, thetao, so, uo, vo]
+    start: 2025-01-01
+    period: 1D          # start .. start+1d, all steps kept -> initial condition
+
+  - name: bry
+    datasource: cmems_mod_glo_phy_anfc_0.083deg_P1D-m
+    variables: [zos, thetao, so, uo, vo]
+    start: 2025-01-01
+    period: 31D         # start .. start+31d, all steps kept

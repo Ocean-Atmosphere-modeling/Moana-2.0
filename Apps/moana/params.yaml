@@ -1,0 +1,77 @@
+# Model parameters: the horizontal grid, the vertical levels and the time
+# settings of this application, in one file. The grid file, the ROMS input
+# file and the files that scripts/make_roms_inputs.py makes must all agree
+# with it.
+#
+# Rules:
+#   - A key with a ROMS name (Lm, N, Vtransform, THETA_S, DT, ...) is the
+#     ROMS input-file keyword of that name.
+#   - "(yet to decide)" is a value that nobody has chosen (docs/roadmap.md).
+#     The "candidates" next to it are the values in use now, and where.
+#   - "status" of a section is "(yet to decide)" or "decided".
+#   - Write plain numbers (6.0, not 6.0d0) and true/false (not T/F).
+#
+# Check:  python scripts/check_params.py Apps/moana
+# It compares this file with the ROMS input file and the grid file.
+
+schema_version: 1
+
+# Horizontal grid. The values are those of the published Moana grid
+# (Souza et al., 2023, Sect. 2.1), the only grid file that we have. The
+# other option is a new grid from gebco_2026 on DataMesh.
+grid:
+  status: (yet to decide)         # docs/roadmap.md M2-T1
+  file: Input/moana_grid.nc       # same sha256 as nz5km_grd.nc in inputs.tsv
+  projection: mercator            # uniform in longitude and in Mercator y
+  bounding_box:                   # outer cell corners (lon_vert, lat_vert)
+    lon_min: 161.0                # degree_east
+    lon_max: 185.0
+    lat_min: -52.0                # degree_north
+    lat_max: -31.0
+  Lm: 395                         # interior rho-points in I (xi_rho = Lm + 2)
+  Mm: 465                         # interior rho-points in J (eta_rho = Mm + 2)
+  # The box, Lm and Mm set the spacing: dlon = (lon_max - lon_min) / (Lm + 2).
+  spacing_km:                     # 1/pm and 1/pn; changes with latitude
+    min: 4.15
+    max: 5.79
+  bathymetry:
+    source: GEBCO, navigation charts and echo sounder surveys
+    smoothing: >-
+      iterative, only where the pressure-gradient error gives bottom
+      velocities above 1 cm/s; total volume kept
+    hmin: 10.0                    # m
+    hmax: 6000.0                  # m
+
+# Vertical levels (s-coordinates, ROMS/Utility/set_scoord.F). The candidates
+# do not agree. Figures/moana_slevels.png compares the grid-file set with
+# the trial set (python_scripts/plot_slevels.py).
+vertical:
+  status: (yet to decide)         # docs/roadmap.md M2-T2
+  Vtransform: 2                   # all candidates and make_roms_inputs.py use 2, so hc = TCLINE
+  Vstretching: (yet to decide)
+  N: (yet to decide)              # number of rho-levels
+  THETA_S: (yet to decide)        # surface stretching
+  THETA_B: (yet to decide)        # bottom stretching
+  TCLINE: (yet to decide)         # m
+  candidates:
+    grid_file: {N: 40, Vstretching: 5, THETA_S: 6.5, THETA_B: 2.0, TCLINE: 100.0}
+    moana_in:  {N: 50, Vstretching: 5, THETA_S: 6.0, THETA_B: 2.0, TCLINE: 250.0}
+    trial:     {N: 40, Vstretching: 4, THETA_S: 7.0, THETA_B: 2.0, TCLINE: 250.0}
+  # grid_file: s_w, Cs_w, theta_s, theta_b and hc in Input/moana_grid.nc. The
+  #   file has no Vstretching or Vtransform; its Cs_w agrees with
+  #   Vstretching 5, and hc = Tcline agrees with Vtransform 2.
+  # moana_in:  Runs/moana.in. The hindcast paper also gives 50 levels,
+  #   theta_s 6, theta_b 2 and the Souza et al. (2015) stretching.
+  # trial:     TRIAL in python_scripts/plot_slevels.py.
+
+# Time. Times in all input and output files are days since TIME_REF.
+time:
+  status: (yet to decide)         # docs/roadmap.md M3-T2, M8-T1, M9-T1
+  TIME_REF: (yet to decide)       # yyyymmdd
+  DT: (yet to decide)             # s, baroclinic time step (M8-T1)
+  NDTFAST: (yet to decide)        # barotropic time steps in one baroclinic step
+  start: (yet to decide)          # run period (M9-T1)
+  end: (yet to decide)
+  candidates:
+    moana_in: {TIME_REF: 20100101, DT: 100.0, NDTFAST: 44}
+  # moana_in: Runs/moana.in, the published configuration (not examined yet, M3-T2).
