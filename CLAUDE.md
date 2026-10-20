@@ -5,8 +5,8 @@ reproducible is in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 ## Docs maintenance
 At the end of any session that changes code, configs, or plans:
-- Add a dated entry to `docs/devlog.md`.
-- Update task status in `docs/roadmap.md` and the "Status" table in `docs/README.md`.
+- Add a dated entry to `docs/devlog.md`. Keep it very short: the problem and how we handle it.
+- Do not change `docs/roadmap.md` or `docs/README.md`. The user updates them.
 - If a model run was made, add a row to `docs/runs.md`.
 - If a significant choice was made, add an entry to `docs/decisions.md` with status `Proposed`.
 - If DataMesh access changes, run `scripts/check_datamesh.py` and update `docs/data.md`.

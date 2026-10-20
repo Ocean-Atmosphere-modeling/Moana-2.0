@@ -39,3 +39,27 @@ python get_datamesh_ic.py            # download using the config
 ```
  
 Output: `OUTPUT_DIR/<name>_<VAR_NAME>_raw_<DATE>.nc`
+
+### Step 2: Interpolate the boundary data to the ROMS open edges
+
+Edit `make_bry.yaml`, then run:
+
+```bash
+python scripts/make_bry.py            # or: python scripts/make_bry.py other.yaml
+```
+
+| key        | meaning                                                                    |
+|------------|----------------------------------------------------------------------------|
+| `GRID`     | ROMS grid file                                                             |
+| `SOURCES`  | raw files from Step 1 (glob patterns); tiles in space and time are joined  |
+| `VARMAP`   | ROMS field → raw variable name (`u`, `v` are eastward, northward)          |
+| `EDGES`    | open boundaries to write                                                   |
+| `VERTICAL` | s-levels; must be the same as in the ROMS input file                       |
+| `TIME_REF` | output times are days since this date                                      |
+| `PAD_DEG`  | half-width of the source strip read around each edge (degrees)             |
+| `OUTPUT`   | boundary file (`BRYNAME`)                                                  |
+
+The script stops if the raw data does not cover an edge point. Download the
+area east of 180E as a second tile (longitude −180 to −174.5) and add it to
+`SOURCES`.
+

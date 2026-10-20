@@ -1,0 +1,23 @@
+# Config for scripts/make_bry.py: raw DataMesh fields -> ROMS boundary file (BRYNAME).
+# Get the raw files with scripts/download_input.py first.
+
+GRID: /projects/f_omg_1/moa/moana/grd_moana5km.nc
+
+# Raw files, glob patterns. The script joins tiles in space (e.g. the two sides of 180E)
+# and in time (e.g. one file per month), and drops duplicate times.
+SOURCES:
+  - /projects/f_omg_1/moa/moana/oceanum_input/boundary_cond/*_raw_*.nc
+
+# ROMS field: variable name in the raw files. u and v are eastward and northward velocity.
+VARMAP: {zeta: zos, temp: thetao, salt: so, u: uo, v: vo}
+
+EDGES: [west, east, south, north]   # open boundaries to write
+
+# s-levels. Must be the same as in the ROMS input file.
+# Apps/moana/params.yaml: (yet to decide). These are its "moana_in" candidate (Runs/moana.in).
+VERTICAL: {N: 50, Vtransform: 2, Vstretching: 5, theta_s: 6.0, theta_b: 2.0, Tcline: 250.0}
+
+TIME_REF: 2010-01-01   # times are days since TIME_REF. params.yaml: (yet to decide); moana_in candidate.
+PAD_DEG: 1.0           # half-width (degrees) of the source strip that is read around each edge
+
+OUTPUT: /projects/f_omg_1/moa/moana/oceanum_input/boundary_cond/moana_bry.nc
