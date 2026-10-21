@@ -3,6 +3,10 @@ roms/
 
 # Large data files
 *.nc
+Data/
+
+# Slurm job logs
+*.log
 
 # Jupyter auto-saves
 .ipynb_checkpoints/
