@@ -1,0 +1,37 @@
+# Moana-2.0 Python environment for pyroms (ROMS grid, IC/BC and remapping tools).
+#
+# pyroms builds with numpy.distutils. This needs Python <= 3.11, numpy < 2
+# and setuptools < 60, thus pyroms cannot go in moana_python (Python 3.12,
+# numpy 2; copernicusmarine >= 2.4 needs numpy >= 2.1).
+#
+# Create:  conda env create -f env/moana_pyroms.yml
+#          conda activate moana_pyroms && bash scripts/install_pyroms.sh
+# Use:     conda activate moana_pyroms
+#
+# The exact versions that were installed are in env/moana_pyroms.lock.txt;
+# to rebuild that environment exactly (Linux x86-64):
+#   conda create -n moana_pyroms --file env/moana_pyroms.lock.txt
+# After changing this file, recreate the environment and regenerate the lock:
+#   conda list -n moana_pyroms --explicit > env/moana_pyroms.lock.txt
+name: moana_pyroms
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - numpy=1.26
+  - scipy
+  - matplotlib
+  - netcdf4
+  - cftime
+  - xarray
+  - pyyaml
+  - basemap
+  - basemap-data-hires
+  - lpsolve55
+  # build tools for scripts/install_pyroms.sh
+  - setuptools<60
+  - pip<25.3
+  - gfortran
+  - netcdf-fortran
+  - make

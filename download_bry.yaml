@@ -1,0 +1,17 @@
+# --- source ---
+DATASOURCE: cmems_mod_glo_phy-cur_anfc_0-083deg_pt6h-i
+LON_CONVENTION: "-180_180"        # the DATASOURCE's convention, not the grid's
+VARIABLES: [uo, vo]
+
+# --- ROMS grid: the four bboxes are computed from it ---
+GRID: /projects/f_omg_1/moa/moana/moana_grid_N50.nc
+PAD: 1.0                          # degrees around each boundary line
+SIDES: [south, north, west, east] # drop any closed boundary
+
+# --- time: first and last day of the run; the script adds the margin ---
+START: "2026-01-01"
+END: "2026-03-31"
+
+# --- output: one file per side, in OUTPUT_DIR/<side>/ ---
+OUTPUT_DIR: /projects/f_omg_1/moa/moana/oceanum_input/boundary_cond/raw
+name: uo_vo

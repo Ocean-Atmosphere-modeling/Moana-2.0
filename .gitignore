@@ -30,3 +30,7 @@ tests/*/results/
 Apps/moana/roms.in
 Apps/moana/roms3d.h
 Apps/moana/roms_config.sh
+
+# pyroms source (ESMG/pyroms): a separate git clone, made and installed by
+# scripts/install_pyroms.sh at a fixed commit, never committed.
+pyroms/

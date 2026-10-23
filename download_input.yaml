@@ -3,9 +3,10 @@
 # name: ic
 
 # DATASOURCE: cmems_mod_glo_phy-cur_anfc_0-083deg_pt6h-i
+# LON_CONVENTION: "-180_180"   # longitude convention of DATASOURCE: "0_360" or "-180_180"
 # VARIABLES: [uo, vo]
 # VAR_NAME: uo_vo
-# DATE: 2025-01-01
+# DATE: 2026-01-01
 # OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
 # PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
 # GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
@@ -15,9 +16,10 @@
 # name: ic
 
 # DATASOURCE: cmems_mod_glo_phy-so_anfc_0-083deg_pt6h-i
+# LON_CONVENTION: "-180_180"   # longitude convention of DATASOURCE: "0_360" or "-180_180"
 # VARIABLES: [so]
 # VAR_NAME: so
-# DATE: 2025-01-01
+# DATE: 2026-01-01
 # OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
 # PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
 # GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
@@ -27,9 +29,10 @@
 # name: ic
 
 # DATASOURCE: cmems_mod_glo_phy-thetao_anfc_0-083deg_pt6h-i
+# LON_CONVENTION: "-180_180"   # longitude convention of DATASOURCE: "0_360" or "-180_180"
 # VARIABLES: [thetao]
 # VAR_NAME: thetao
-# DATE: 2025-01-01
+# DATE: 2026-01-01
 # OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
 # PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
 # GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
@@ -37,15 +40,16 @@
 
 
 
-# name: ic
+name: ic
 
-# DATASOURCE: cmems_mod_glo_phy_anfc_0-083deg_pt1h-m
-# VARIABLES: [zos]
-# VAR_NAME: zos
-# DATE: 2025-01-01
-# OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
-# PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
-# GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
+DATASOURCE: cmems_mod_glo_phy_anfc_0-083deg_pt1h-m
+LON_CONVENTION: "-180_180"   # longitude convention of DATASOURCE: "0_360" or "-180_180"
+VARIABLES: [zos]
+VAR_NAME: zos
+DATE: 2026-01-01
+OUTPUT_DIR : "/projects/f_omg_1/moa/moana/oceanum_input/initial_cond"
+PERIOD: 1D          # start .. start+1d, all steps kept -> initial condition
+GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
 
   # - name: bry
   #   DATASOURCE: cmems_mod_glo_phy_anfc_0.083deg_P1D-m

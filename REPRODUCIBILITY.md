@@ -113,6 +113,12 @@ conda create -n moana_python --file env/moana_python.lock.txt   # exact
 conda env create -f env/moana_python.yml                        # or latest
 ```
 
+pyroms (ROMS grid and boundary tools) cannot go in `moana_python`: it needs
+Python 3.11 and numpy < 2. It uses a second environment, `moana_pyroms`
+(`env/moana_pyroms.yml` and `env/moana_pyroms.lock.txt`). After you create
+it, run `scripts/install_pyroms.sh`. This script clones ESMG/pyroms at a
+fixed commit and builds pyroms and its SCRIP extension.
+
 The receipt (below) records a checksum of the active conda environment. It
 equals `grep -v '^#' env/moana_python.lock.txt | sha256sum` when the
 environment matches the lock file exactly.
