@@ -21,12 +21,12 @@ import xarray as xr
 from scipy.ndimage import distance_transform_edt
 
 # %% 0. Settings
-GRID = "/projects/f_omg_1/moa/moana/grd_moana5km.nc"
-TPXO = "/projects/f_omg_1/moa/moana/Input/tides/tpxo9_atlas_v5_moana.nc"
+GRID = "/projects/f_omg_1/moa/moana/moana_grid_N50.nc"
+TPXO = "/projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/tpxo9_atlas_v5_moana.nc"
 CONSTITUENTS = ["M2", "S2", "N2", "K2", "K1", "O1", "P1", "Q1", "MM", "MF", "M4", "MN4", "MS4", "2N2", "S1"]
-REF_DATE = "2010-01-01"                  # phase zero time = TIME_REF + TIDE_START in moana.in
+REF_DATE = "2026-01-01"                  # phase zero time = TIME_REF + TIDE_START in moana.in
 NODAL_DATE = "2026-02-15"                # date for nodal amplitude and phase: middle of the run
-OUT = "/projects/f_omg_1/moa/moana/Input/tides/moana_tides.nc"
+OUT = "/projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/moana_tides.nc"
 
 # %% 1. ROMS grid
 grid = xr.open_dataset(GRID)

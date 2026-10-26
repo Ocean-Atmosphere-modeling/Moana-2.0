@@ -19,7 +19,7 @@ import numpy as np
 import xarray as xr
 
 REPO = Path(__file__).resolve().parents[1]
-TIDES = Path("/projects/f_omg_1/moa/moana/Input/tides/moana_tides.nc")
+TIDES = Path("/projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/moana_tides.nc")
 LAND = "#bdb8ad"
 
 f = xr.open_dataset(TIDES)

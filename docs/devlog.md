@@ -2,6 +2,40 @@
 
 Newest entry first.
 
+## 2026-10-26
+
+### Webpage for make_tides.py
+
+- Problem: no simple explanation of the steps in `scripts/make_tides.py`.
+- Handling: new folder `webpage_folder/`. `tide_page.html` explains each
+  step and why it is necessary. `fig_*.py` (8 scripts, shared code in
+  `common.py`) write the figures to `webpage_folder/figures/`.
+- Result from `fig_coast_fill.py`: 354 of 174292 ROMS water points touch
+  TPXO land. From `fig_depth_currents.py` (M2, no nodal correction): TPXO
+  velocity gives max Cmax 10.05 m/s and 53 points > 2 m/s. Transport /
+  ROMS h gives max Cmax 1.36 m/s and 0 points > 2 m/s.
+
+### Tide file: phase zero at the model start
+
+- Problem: `scripts/fetch_tpxo.py` was deleted, but `make_tides.py` needs
+  its output. In `make_tides.py`, REF_DATE was 2010-01-01, and GRID was
+  `grd_moana5km.nc`. That file is not in `/projects/f_omg_1/moa/moana/` now.
+- Handling: `fetch_tpxo.py` is back from git. A new download is identical to
+  `Input/tides/tpxo9_atlas_v5_moana.nc` (same DataMesh cache hash). TPXO has
+  no time axis, so the run dates do not change the download.
+- REF_DATE is now 2026-01-01, the model start. The run is 3 months, so
+  NODAL_DATE stays 2026-02-15. GRID is now `moana_grid_N50.nc`, which has the
+  same lon, lat, h and mask (`make_N50_grid.py` changes only the vertical
+  levels). `make_tides.py` wrote `Input/tides/moana_tides.nc` again.
+- Test: the old file (phase zero 2010) and the new file give the same
+  elevation on 2026-01-01, 2026-02-15 and 2026-03-31 (max |diff| < 1e-9 m).
+  Amplitudes and Cmax are the same.
+- The tide files and `fetch_tpxo.log` are now in
+  `oceanum_input/tide_forcing/`, not in `Input/tides/`. The paths in
+  `fetch_tpxo.py`, `make_tides.py`, `plot_tides.py` and `plot_tide_file.py`
+  are changed. `make_tides.py` wrote the file again: the data did not
+  change, and the `source` attribute now gives the new TPXO path.
+
 ## 2026-10-23
 
 ### Initial condition: vertical interpolation check

@@ -63,7 +63,7 @@
 !
 ! Application title.
 
-       TITLE = New Zealand Reanalysis
+       TITLE = Moana 2.0
 
 ! C-preprocessing Flag.
 
@@ -277,8 +277,8 @@ ad_VolCons(north) ==  F                            ! northern boundary
         NTLM == 864         ! daily
      NDEFTLM == 0
    LcycleADJ == F
-        NADJ == 864        ! Strong constraint
-!       NADJ == 1440         ! Weak constraint (daily)
+        NADJ == 864         ! Strong constraint
+!       NADJ == 1440        ! Weak constraint (daily)
      NDEFADJ == 0
         NSFF == 864         ! 4 x daily
         NOBC == 864         ! daily

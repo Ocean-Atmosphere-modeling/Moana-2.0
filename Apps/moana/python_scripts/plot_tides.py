@@ -5,7 +5,7 @@ Usage (moana_python environment, see env/moana_python.yml):
 
     python Apps/moana/python_scripts/plot_tides.py [--out DIR]
 
-Reads Input/tides/tpxo9_atlas_v5_moana.nc (scripts/fetch_tpxo.py) and writes
+Reads oceanum_input/tide_forcing/tpxo9_atlas_v5_moana.nc (scripts/fetch_tpxo.py) and writes
 moana_tides.{pdf,png} to --out (default Apps/moana/Figures).
 
 Panels a-e: elevation amplitude (shading) and Greenwich phase lag (cotidal
@@ -38,7 +38,7 @@ from scipy.ndimage import gaussian_filter
 from plot_glorys_ic_bc import colorbar, map_axes, save, tidy
 from plot_grid import APP, HALO, INK, MM, axes_mm, load_grid, merc, panel_label
 
-TPXO = Path("/projects/f_omg_1/moa/moana/Input/tides/tpxo9_atlas_v5_moana.nc")
+TPXO = Path("/projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/tpxo9_atlas_v5_moana.nc")
 MAPS = ("M2", "S2", "N2", "K1", "O1")
 GAUGE_CONS = ("M2", "S2", "N2", "K1")
 # dataviz categorical slots 1-4 (validated adjacent, light mode)
