@@ -1,228 +1,219 @@
-#!/usr/bin/env python3
 """
-Interpolate raw ocean fields (from download_input.py) to the open boundaries of a ROMS grid.
+Build a ROMS boundary file from CMEMS (DataMesh) strips, one strip per open boundary.
 
-  python scripts/make_bry.py                 # uses make_bry.yaml at the repo root
-  python scripts/make_bry.py other.yaml
+Input:  RAW/<side>/*.nc for each side in SIDES: CMEMS fields on a bbox strip around that ROMS boundary line
+Output: one boundary file with temp/salt/u/v/ubar/vbar/zeta _<side>, on a shared bry_time
+        bry_zlevels_<CHECK_TIME>.nc next to it: the 3-D fields at one record after step c only
+        (still on the CMEMS levels), for scripts/plot_bry_vertical_check.py
 
-Output: one ROMS boundary file (BRYNAME) with zeta, ubar, vbar, u, v, temp, salt for each edge in
-EDGES, on the grid's rho/u/v points and on the s-levels in VERTICAL.
+Same method as interp_u_ic.py, applied to a 1-D line of points per side and looped over time:
+  1. ROMS grid -> boundary lines and their depths                  (xroms)
+  2. For each side, for each block of time steps:
+     a. load the strip, keep only +-PAD deg around the boundary line
+     b. fill NaNs (same-depth neighbours, then downward, then the rest)
+     c. horizontal interpolation to the boundary line            (xarray)
+     d. vertical interpolation to the s-levels                    (xarray + np.interp)
+     e. mask land, depth-average u/v to ubar/vbar
+  3. Write
 
-Method, per edge (only edge points are computed, never the full 3-D grid):
-1. Source: each file in SOURCES is cut to a strip around the edge. Longitude is taken modulo 360,
-   so tiles on both sides of 180E join into one array; tiles of different dates are joined in time
-   and duplicate times dropped. Each variable keeps its own time axis (hourly zos with 6-hourly
-   T/S/UV is fine).
-2. Land fill: on each source level, a NaN cell takes the value of the nearest wet cell (distance
-   transform). A level with no wet cell takes the level above.
-3. Horizontal: bilinear from the regular lon/lat source to the edge points. Steps 2-3 are one
-   precomputed gather index, so each variable costs one fancy-index over all times.
-4. Vertical: linear in depth to the ROMS z of the s-levels at rest (zeta = 0); constant above the
-   top and below the bottom source level.
-5. Velocity: uo/vo (east/north) go to u- and v-points and are rotated by the grid angle.
-   ubar/vbar are the Hz-weighted mean of u/v on the ROMS levels, so 2-D and 3-D fields agree.
-
-The script stops if an edge point is outside the source or the source has a gap (e.g. the cut at
-180E, docs/devlog.md 2026-10-20), and if any output value is not finite.
+Assumptions (checked where possible)
+- Grid is rectangular in lon/lat: CMEMS uo/vo are ROMS u/v with no rotation.
+- CMEMS depth axis is elevation: negative-up, ordered deep -> surface (DataMesh convention).
+- Depths and layer thicknesses use zeta = 0.
+- Raw files for one side can be opened together with open_mfdataset (same coords, split by time or variable).
 """
 import glob
-import subprocess
-import sys
-from pathlib import Path
-
+import time
 import numpy as np
-import pandas as pd
 import xarray as xr
-import yaml
-from scipy import ndimage
+import xroms
+from scipy.ndimage import convolve
 
-REPO = Path(__file__).resolve().parents[1]
-EDGE = {"west": np.s_[:, 0], "east": np.s_[:, -1], "south": np.s_[0, :], "north": np.s_[-1, :]}
-# ROMS field -> (point set, time variable, units, long name)
-META = {
-    "zeta": ("rho", "zeta_time", "meter", "free-surface"),
-    "ubar": ("u", "v2d_time", "meter second-1", "vertically integrated u-momentum component"),
-    "vbar": ("v", "v2d_time", "meter second-1", "vertically integrated v-momentum component"),
-    "u": ("u", "v3d_time", "meter second-1", "u-momentum component"),
-    "v": ("v", "v3d_time", "meter second-1", "v-momentum component"),
-    "temp": ("rho", "temp_time", "Celsius", "potential temperature"),
-    "salt": ("rho", "salt_time", "PSU", "salinity"),
+# %% 0. Settings
+GRID = "/projects/f_omg_1/moa/moana/moana_grid_N50.nc"
+RAW = "/projects/f_omg_1/moa/moana/oceanum_input/boundary_cond/raw"
+OUT = "/projects/f_omg_1/moa/moana/oceanum_input/boundary_cond/roms-ready/nz5km_N50_bry.nc"
+SIDES = ["south", "north"]                         # drop any closed boundary; west/east not downloaded yet
+VTRANSFORM = 2
+REF_TIME = "2026-01-01"                            # TIME_REF in ocean.in
+START = "2026-01-01"                               # first day of the run
+CHECK_TIME = None                                  # record written to bry_zlevels_*.nc; None: first record at or after START
+LON, LAT, DEPTH, TIME = "longitude", "latitude", "elevation", "time"
+VARS = {                                           # CMEMS name: (ROMS name, point type)
+    "thetao": ("temp", "rho"),
+    "so": ("salt", "rho"),
+    "uo": ("u", "u"),
+    "vo": ("v", "v"),
+    "zos": ("zeta", "rho"),
 }
-SRC_TIME = {"zeta_time": "zeta", "v2d_time": "u", "v3d_time": "u", "temp_time": "temp", "salt_time": "salt"}
+PAD = 1.0                                          # deg of strip kept either side of the boundary line
+N_LATERAL = 10                                     # same-depth fill reach, in CMEMS cells
+TBLOCK = 30                                        # time steps processed at once
+TIMES = slice(None)                                # all times; e.g. slice("2026-01-01", "2026-01-03T00") for a 2-day test
+
+# %% 1. ROMS grid: boundary lines and their depths (xroms)
+grid = xr.open_dataset(GRID)
+grid["zeta"] = xr.zeros_like(grid.h)
+grid, xgrid = xroms.roms_dataset(grid, Vtransform=VTRANSFORM)
+assert float(abs(grid.angle).max()) < 1e-3, "grid is rotated: u/v need rotating with the angle"
+
+# xroms renames eta_u -> eta_rho and xi_v -> xi_rho; map back for the file
+ROMS_DIMS = {"rho": {}, "u": {"eta_rho": "eta_u"}, "v": {"xi_rho": "xi_v"}}
 
 
-# ------------------------------------------------------------------ grid and s-levels
-def grid_points(g):
-    """lon (0-360), lat, h, angle on rho, u and v points, as full 2-D arrays."""
-    h, a = g.h.values, g.angle.values
-    au = lambda f: 0.5 * (f[:, :-1] + f[:, 1:])
-    av = lambda f: 0.5 * (f[:-1] + f[1:])
-    return {
-        "rho": dict(lon=g.lon_rho.values % 360, lat=g.lat_rho.values, h=h, angle=a),
-        "u": dict(lon=g.lon_u.values % 360, lat=g.lat_u.values, h=au(h), angle=au(a)),
-        "v": dict(lon=g.lon_v.values % 360, lat=g.lat_v.values, h=av(h), angle=av(a)),
-    }
+def roms_dims(da, pt):
+    return da.rename({k: v for k, v in ROMS_DIMS[pt].items() if k in da.dims})
+POINTS = {                                         # h = -(bottom w-level), as in the s-levels
+    "rho": dict(z=grid.z_rho, lon=grid.lon_rho, lat=grid.lat_rho, mask=grid.mask_rho, dz=grid.dz,
+                h=-grid.z_w.isel(s_w=0)),
+    "u": dict(z=grid.z_rho_u, lon=grid.lon_u, lat=grid.lat_u, mask=grid.mask_u, dz=grid.dz_u,
+              h=-grid.z_w_u.isel(s_w=0)),
+    "v": dict(z=grid.z_rho_v, lon=grid.lon_v, lat=grid.lat_v, mask=grid.mask_v, dz=grid.dz_v,
+              h=-grid.z_w_v.isel(s_w=0)),
+}
 
 
-def s_coord(N, Vstretching, theta_s, theta_b, w=False):
-    """s and C(s) on rho (N) or w (N+1) levels, as ROMS/Utility/set_scoord.F."""
-    k = np.arange(N + 1.0) if w else np.arange(1, N + 1) - 0.5
-    if Vstretching == 4:
-        s = (k - N) / N
-    elif Vstretching == 5:
-        s = -(k * k - 2 * k * N + k + N * N - N) / (N * N - N) - 0.01 * (k * k - k * N) / (1 - N)
-    else:
-        sys.exit(f"Vstretching {Vstretching} is not coded (4 or 5)")
-    C = (1 - np.cosh(theta_s * s)) / (np.cosh(theta_s) - 1) if theta_s > 0 else -s**2
-    if theta_b > 0:
-        C = (np.exp(theta_b * C) - 1) / (1 - np.exp(-theta_b))
-    return s, C
+def edge(da, side):
+    """The boundary line of a 2-D/3-D grid field: first or last row/column."""
+    axis = "eta_" if side in ("south", "north") else "xi_"
+    dim = next(d for d in da.dims if d.startswith(axis))
+    return da.isel({dim: 0 if side in ("south", "west") else -1}).reset_coords(drop=True)
 
 
-def z_levels(h, v, w=False):
-    """z (m, negative) of the s-levels at rest, Vtransform 2 (hc = Tcline): (N or N+1, points)."""
-    s, C = s_coord(v["N"], v["Vstretching"], v["theta_s"], v["theta_b"], w)
-    hc = v["Tcline"]
-    return h * (hc * s[:, None] + h * C[:, None]) / (hc + h)
+def lines(side, pt):
+    """Boundary-line versions of the POINTS entries, with longitude on 0-360."""
+    out = {k: edge(v, side) for k, v in POINTS[pt].items()}
+    out["lon"] = out["lon"] % 360
+    return out
 
 
-# ------------------------------------------------------------------ source
-def open_source(path):
-    """Raw file with dims named lon, lat, depth (positive down, surface first), lon in 0-360."""
-    ds = xr.open_dataset(path)
-    ds = ds.rename({k: v for k, v in (("longitude", "lon"), ("latitude", "lat")) if k in ds.dims})
-    if "elevation" in ds.dims:
-        ds = ds.assign_coords(depth=-ds.elevation).swap_dims(elevation="depth").drop_vars("elevation")
-    ds = ds.assign_coords(lon=ds.lon % 360)
-    return ds.sortby([d for d in ("lon", "lat", "depth") if d in ds.dims])
+# %% 2. Fill and interpolate
+def flood_fill(da, max_passes=None):
+    """Fill NaNs with the mean of valid 3x3 neighbours at the same depth, one ring of cells per pass.
+
+    Same result as da.fillna(da.rolling({LON: 3, LAT: 3}, center=True, min_periods=1).mean())
+    repeated, but ~7x faster via scipy (exact sums; uniform_filter's running sums are not exact).
+    """
+    a = da.transpose(..., LAT, LON).values.astype("float64")
+    kernel = np.ones((1,) * (a.ndim - 2) + (3, 3))
+    n = 0
+    while np.isnan(a).any() and (max_passes is None or n < max_passes):
+        valid = ~np.isnan(a)
+        total = convolve(np.where(valid, a, 0.0), kernel, mode="constant")
+        count = convolve(valid.astype("float64"), kernel, mode="constant")
+        with np.errstate(invalid="ignore", divide="ignore"):
+            a = np.where(valid, a, total / count)          # count == 0 -> NaN, stays unfilled this pass
+        n += 1
+    return da.copy(data=a).transpose(*da.dims)
 
 
-def load(sources, name, lon, lat, pad, edge):
-    """Variable `name` on a strip around the points, tiles joined: (time, depth, lat, lon)."""
-    tiles = {}
-    for ds in sources:
-        if name not in ds:
+def fill(cm):
+    assert bool(cm.notnull().any()), "field is all NaN"
+    cm = flood_fill(cm, max_passes=N_LATERAL)          # a. same-depth neighbours (coasts, slopes)
+    if DEPTH in cm.dims:
+        cm = cm.bfill(DEPTH)                           # b. deepest valid value copied downward
+    return flood_fill(cm)                              # c. whatever is left (land interiors)
+
+
+def horizontal(cm, ln):
+    """CMEMS strip (time, [depth], lat, lon) -> boundary line (time, [depth], line), per depth level."""
+    return cm.interp({LON: ln["lon"], LAT: ln["lat"]})
+
+
+def vertical(cm_h, ln):
+    """Boundary line on the CMEMS levels (time, depth, line) -> on the s-levels (time, s_rho, line), per column."""
+    return xr.apply_ufunc(
+        np.interp, ln["z"], cm_h[DEPTH], cm_h,
+        input_core_dims=[["s_rho"], [DEPTH], [DEPTH]],
+        output_core_dims=[["s_rho"]],
+        vectorize=True,
+    )
+
+
+def to_line(cm, ln):
+    """CMEMS strip (time, [depth], lat, lon) -> boundary line (time, [s_rho], line), land set to 0."""
+    cm_h = horizontal(cm, ln)
+    if DEPTH not in cm.dims:
+        return cm_h.where(ln["mask"] == 1, 0.0)
+    return vertical(cm_h, ln).where(ln["mask"] == 1, 0.0)
+
+
+def open_side(side):
+    files = sorted(glob.glob(f"{RAW}/{side}/*.nc"))
+    assert files, f"no files in {RAW}/{side}"
+    ds = xr.open_mfdataset(files, combine="by_coords")
+    ds = ds.assign_coords({LON: ds[LON] % 360}).sortby(LON).sortby(TIME)
+    ds = ds.drop_duplicates(TIME)                                        # overlapping downloads
+    ds = ds.sel({TIME: TIMES})
+    assert ds[DEPTH].attrs.get("positive") == "up" and bool((ds[DEPTH].diff(DEPTH) > 0).all()), \
+        "expected elevation: negative-up, ordered deep -> surface"
+    return ds
+
+
+bry = {}
+check = {}                                                              # step c only, at one record: bry_zlevels_*.nc
+t_checks = set()
+for side in SIDES:
+    ds = open_side(side)
+    t_check = ds[TIME].sel({TIME: np.datetime64(CHECK_TIME or START)}, method="bfill").values
+    t_checks.add(t_check)
+    ln = {pt: lines(side, pt) for pt in POINTS}
+    lon0, lon1 = min(l["lon"].min() for l in ln.values()), max(l["lon"].max() for l in ln.values())
+    lat0, lat1 = min(l["lat"].min() for l in ln.values()), max(l["lat"].max() for l in ln.values())
+    ds = ds.sel({LON: slice(lon0 - PAD, lon1 + PAD), LAT: slice(lat0 - PAD, lat1 + PAD)})
+    print(f"{side}: {ds.sizes[TIME]} times, strip {dict(ds.sizes)}")
+
+    here = {cv: VARS[cv] for cv in VARS if cv in ds}                  # skip variables not downloaded yet
+    print(f"  missing in {RAW}/{side}: {sorted(set(VARS) - set(here))}")
+    blocks = {v: [] for v in here}
+    t_read = t_interp = 0.0                                             # seconds: read from disk, fill + interpolate
+    for t0 in range(0, ds.sizes[TIME], TBLOCK):
+        tic = time.perf_counter()
+        blk = ds.isel({TIME: slice(t0, t0 + TBLOCK)}).load()
+        t_read += time.perf_counter() - tic
+        tic = time.perf_counter()
+        for cv, (rv, pt) in here.items():
+            filled = fill(blk[cv])
+            blocks[cv].append(to_line(filled, ln[pt]))
+            if DEPTH in filled.dims and t_check in blk[TIME].values:
+                cm_h = horizontal(filled.sel({TIME: t_check}), ln[pt]).reset_coords(drop=True)
+                check[f"{rv}_{side}"] = roms_dims(cm_h, pt)
+        t_interp += time.perf_counter() - tic
+        print(f"  {side}: {min(t0 + TBLOCK, ds.sizes[TIME])}/{ds.sizes[TIME]}")
+    print(f"  {side} timing: read {t_read:.1f} s, fill + interpolation {t_interp:.1f} s")
+    for pt in {pt for cv, (rv, pt) in here.items() if DEPTH in ds[cv].dims}:   # the lines of bry_zlevels_*.nc
+        for k in ("lon", "lat", "h", "mask"):
+            check[f"{k}_{pt}_{side}"] = roms_dims(ln[pt][k], pt)
+
+    for cv, (rv, pt) in here.items():
+        da = xr.concat(blocks[cv], dim=TIME).reset_coords(drop=True)     # keep only the time coordinate
+        order = [TIME] + (["s_rho"] if "s_rho" in da.dims else [])      # ROMS order: time, s_rho, line
+        bry[f"{rv}_{side}"] = roms_dims(da, pt).transpose(*order, ...)
+    for rv, pt in (("u", "u"), ("v", "v")):                             # thickness-weighted depth mean
+        if f"{rv}_{side}" not in bry:
             continue
-        da = ds[name] if "depth" in ds[name].dims else ds[name].expand_dims(depth=[0.0])
-        da = da.sel(lon=slice(lon.min() - pad, lon.max() + pad), lat=slice(lat.min() - pad, lat.max() + pad))
-        if da.lon.size and da.lat.size:
-            tiles.setdefault((round(float(da.lon[0]), 3), round(float(da.lat[0]), 3)), []).append(da)
-    if not tiles:
-        sys.exit(f"{edge} edge: no file in SOURCES has {name} near the edge")
-    parts = [xr.concat(t, "time").sortby("time").drop_duplicates("time").to_dataset(name=name)
-             for t in tiles.values()]
-    da = xr.combine_by_coords(parts, join="inner")[name].transpose("time", "depth", "lat", "lon").load()
-    for c, x in (("lon", lon), ("lat", lat)):
-        s = da[c].values
-        ds_ = np.diff(s)
-        if x.min() < s[0] or x.max() > s[-1] or ds_.max() > 1.5 * np.median(ds_):
-            sys.exit(f"{edge} edge, {name}: points need {c} {x.min():.2f} to {x.max():.2f}; "
-                     f"source has {s[0]:.2f} to {s[-1]:.2f}, largest step {ds_.max():.3f}")
-    return da
+        dz, mask = roms_dims(ln[pt]["dz"], pt), roms_dims(ln[pt]["mask"], pt)
+        bar = (bry[f"{rv}_{side}"] * dz).sum("s_rho") / dz.sum("s_rho")
+        bry[f"{rv}bar_{side}"] = bar.where(mask == 1, 0.0).reset_coords(drop=True)
 
-
-# ------------------------------------------------------------------ interpolation
-def hinterp(da, lon, lat):
-    """Land-filled bilinear interpolation of da (time, depth, lat, lon) to points: (time, depth, pt)."""
-    x, y, f = da.lon.values, da.lat.values, da.values
-    nt, nz, ny, nx = f.shape
-    i = np.clip(np.searchsorted(x, lon) - 1, 0, nx - 2)
-    j = np.clip(np.searchsorted(y, lat) - 1, 0, ny - 2)
-    wx, wy = (lon - x[i]) / (x[i + 1] - x[i]), (lat - y[j]) / (y[j + 1] - y[j])
-    jc, ic = np.stack([j, j, j + 1, j + 1]), np.stack([i, i + 1, i, i + 1])        # 4 corners
-    w = np.stack([(1 - wx) * (1 - wy), wx * (1 - wy), (1 - wx) * wy, wx * wy])
-    idx, kk = np.empty((nz,) + jc.shape, dtype=np.intp), np.arange(nz)
-    for k in range(nz):                                    # surface first
-        wet = np.isfinite(f[0, k])
-        if not wet.any():
-            if k == 0:
-                sys.exit(f"{da.name}: no wet source cell at the top level")
-            idx[k], kk[k] = idx[k - 1], kk[k - 1]
-            continue
-        _, (nj, ni) = ndimage.distance_transform_edt(~wet, return_indices=True)
-        idx[k] = (nj * nx + ni)[jc, ic]
-    return (f.reshape(nt, nz, ny * nx)[:, kk[:, None, None], idx] * w).sum(axis=2)
-
-
-def vinterp(f, dep, z):
-    """Linear in depth: f (time, depth, pt) on source depths dep -> (time, N, pt) at z (N, pt)."""
-    d = np.clip(-z, dep[0], dep[-1])
-    k = np.clip(np.searchsorted(dep, d) - 1, 0, len(dep) - 2)
-    w = (d - dep[k]) / (dep[k + 1] - dep[k])
-    p = np.arange(z.shape[1])
-    return f[:, k, p] * (1 - w) + f[:, k + 1, p] * w
-
-
-# ------------------------------------------------------------------ main
-def main():
-    cfg_path = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "make_bry.yaml"
-    cfg = yaml.safe_load(open(cfg_path))
-    vert, vmap = cfg["VERTICAL"], cfg["VARMAP"]
-    if vert["Vtransform"] != 2:
-        sys.exit("only Vtransform 2 is coded")
-    files = sorted(f for p in cfg["SOURCES"] for f in glob.glob(str(p)))
-    if not files:
-        sys.exit(f"no file matches SOURCES {cfg['SOURCES']}")
-    print(f"config {cfg_path}\n{len(files)} source files")
-    sources = [open_source(f) for f in files]
-    pts = grid_points(xr.open_dataset(cfg["GRID"]))
-
-    out, times = {}, {}
-    for edge in cfg["EDGES"]:
-        e = {p: {q: a[EDGE[edge]] for q, a in d.items()} for p, d in pts.items()}
-        lon = np.concatenate([e[p]["lon"] for p in e])
-        lat = np.concatenate([e[p]["lat"] for p in e])
-        src = {r: load(sources, vmap[r], lon, lat, cfg["PAD_DEG"], edge) for r in ("zeta", "temp", "salt", "u", "v")}
-
-        def on(r, p):
-            f = hinterp(src[r], e[p]["lon"], e[p]["lat"])
-            return f[:, 0] if r == "zeta" else vinterp(f, src[r].depth.values, z_levels(e[p]["h"], vert))
-
-        f = {r: on(r, "rho") for r in ("zeta", "temp", "salt")}
-        for p in ("u", "v"):
-            ue, vn = on("u", p), on("v", p)
-            ca, sa = np.cos(e[p]["angle"]), np.sin(e[p]["angle"])
-            f[p] = ue * ca + vn * sa if p == "u" else vn * ca - ue * sa
-            hz = np.diff(z_levels(e[p]["h"], vert, w=True), axis=0)
-            f[p + "bar"] = (f[p] * hz).sum(axis=1) / hz.sum(axis=0)
-
-        if not np.array_equal(src["u"].time, src["v"].time):
-            sys.exit(f"{edge} edge: {vmap['u']} and {vmap['v']} have different times")
-        for tname, r in SRC_TIME.items():
-            t = src[r].time.values
-            if tname in times and not np.array_equal(times[tname], t):
-                sys.exit(f"{edge} edge: {tname} differs from the other edges")
-            times[tname] = t
-        for r, a in f.items():
-            if not np.isfinite(a).all():
-                sys.exit(f"{edge} edge: {r} has values that are not finite")
-            out[r, edge] = a
-            print(f"{r + '_' + edge:11s} {str(a.shape):16s} min {a.min():9.3f}  max {a.max():9.3f}")
-
-    t_ref = pd.Timestamp(cfg["TIME_REF"])
-    s_rho, Cs_r = s_coord(vert["N"], vert["Vstretching"], vert["theta_s"], vert["theta_b"])
-    ds = xr.Dataset(coords={"s_rho": ("s_rho", s_rho, {"long_name": "S-coordinate at RHO-points"})})
-    ds["Cs_r"] = ("s_rho", Cs_r, {"long_name": "S-coordinate stretching curves at RHO-points"})
-    for tname, t in times.items():
-        ds[tname] = (tname, (pd.DatetimeIndex(t) - t_ref) / pd.Timedelta("1D"),
-                     {"long_name": f"{tname.replace('_', ' ')}", "units": f"days since {t_ref:%Y-%m-%d %H:%M:%S}"})
-    for (r, edge), a in out.items():
-        p, tname, units, long_name = META[r]
-        along = f"{'eta' if edge in ('west', 'east') else 'xi'}_{p}"
-        dims = (tname, "s_rho", along) if a.ndim == 3 else (tname, along)
-        ds[f"{r}_{edge}"] = (dims, a.astype("f4"),
-                             {"long_name": f"{long_name}, {edge} boundary", "units": units, "time": tname})
-
-    commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"],
-                            capture_output=True, text=True).stdout.strip()
-    ds.attrs = {"type": "ROMS boundary file", "grid": str(cfg["GRID"]), "sources": " ".join(files),
-                **{k: str(v) for k, v in vert.items()},
-                "history": f"scripts/make_bry.py {cfg_path} (git {commit or 'unknown'}), {pd.Timestamp.now():%Y-%m-%d %H:%M}"}
-    out_path = Path(cfg["OUTPUT"])
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    ds.to_netcdf(out_path, encoding={v: {"_FillValue": None} for v in ds.variables})
-    print(f"wrote {out_path}")
-
-
-if __name__ == "__main__":
-    main()
+# %% 3. Write
+out = xr.Dataset(bry).rename({TIME: "bry_time"})
+out = out.drop_vars([c for c in out.coords if c != "bry_time"])          # no index coords on xi/eta/s_rho
+for v in out.data_vars:
+    assert not out[v].isnull().any(), f"NaNs in {v}"
+    out[v].attrs = {"long_name": f"{v.split('_')[0]} {v.split('_')[1]}ern boundary condition", "time": "bry_time"}
+out["bry_time"].encoding = {"units": f"days since {REF_TIME}", "calendar": "proleptic_gregorian", "dtype": "float64"}
+out.attrs = {"title": "ROMS boundary conditions from CMEMS via DataMesh", "grid": GRID,
+             "Vtransform": VTRANSFORM, "N": grid.sizes["s_rho"]}
+out.to_netcdf(OUT)
+print(f"Wrote {OUT}: {dict(out.sizes)}")
+# %% 4. Write the check file: 3-D fields after the horizontal step only, at one record
+assert len(t_checks) == 1, f"CHECK_TIME record differs between sides: {t_checks}"
+stamp = np.datetime_as_string(t_checks.pop(), unit="h")
+zl = xr.Dataset(check)
+zl.attrs = {"title": "Boundary lines after the horizontal interpolation only, on the CMEMS levels",
+            "time": stamp, "bry_file": OUT,
+            "note": "elevation is negative-up; h = depth of the line at that point type; mask 1 = ocean"}
+zl_out = OUT.rsplit("/", 1)[0] + f"/bry_zlevels_{stamp}.nc"
+zl.to_netcdf(zl_out)
+print(f"Wrote {zl_out}: {dict(zl.sizes)}")

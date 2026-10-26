@@ -5,8 +5,8 @@ Author: Suman Shekhar
 Download the ocean state along each ROMS open boundary from Oceanum DataMesh, for a ROMS boundary file.
 
   export DATAMESH_TOKEN=...
-  python download_bry.py --list     # search the catalog for the datasource id, then set DATASOURCE in the yaml
-  python download_bry.py            # download
+  python scripts/download_bry.py                # uses download_bry.yaml at the repo root
+  python scripts/download_bry.py other.yaml
 
 Output: OUTPUT_DIR/<side>/<name>_<side>_raw_<START>_<END>.nc for each side in SIDES, with the source's
 native variable names and grid, over a strip around that boundary. Interpolation to the ROMS grid is
@@ -14,16 +14,19 @@ a separate step (make_bry.py).
 
 Assumptions
 - DATASOURCE is a gridded 3D ocean product (GLORYS/Copernicus mirror or Oceanum's own hindcast)
-  with lon/lat/depth coordinates.
-- START and END are the first and last day of the run. The download covers START - 1 day to
-  END + 2 days, so there is a record before the run starts and after it ends (daily means are
-  stamped 12:00); this is checked after download.
+  with lon/lat/depth coordinates. One run reads one DATASOURCE, so uo/vo, thetao, so and zos
+  (different CMEMS datasets) each need their own run with their own yaml.
+- START and END are the first and last day of the run. The run ends at midnight after END.
+  The download covers START - 1 day to END + 2 days, so there is a record at or before the
+  run start and at or after the run end for any time step (hourly, 6-hourly or daily). This is
+  checked after download.
 - The strips are computed from GRID's rho-, u- and v-points on each edge, padded by PAD degrees so
   the later interpolation and fill have data past the edges.
 - LON_CONVENTION in the yaml is the DATASOURCE's longitude convention ("0_360" or "-180_180").
   DataMesh silently truncates a box that crosses that convention's seam, so such a box is
-  requested as two pieces and joined. The output longitudes are contiguous across the seam
-  (e.g. 160 to 186 for NZ from a -180_180 source). Coverage is checked after download.
+  requested as two pieces and joined, with contiguous longitudes (e.g. 160 to 186 for the NZ
+  south and north strips from a -180_180 source). A box that does not cross the seam keeps the
+  source's longitudes (e.g. -176 to -174 for the NZ east strip).
 """
 import sys
 from pathlib import Path
@@ -33,7 +36,7 @@ import pandas as pd
 import xarray as xr
 from oceanum.datamesh import Connector
 
-CONFIG = '/scratch/ss4338/Project/Moana-2.0/download_bry.yaml'
+REPO = Path(__file__).resolve().parents[1]
 
 
 def wrap_lon(x, convention):
@@ -96,32 +99,46 @@ def query_bbox(dm, cfg, bbox, t0, t1):
 
 
 def check_coverage(ds, bbox, run_start, run_end):
-    """Raise if the download doesn't cover the requested box and run period (DataMesh truncates silently)."""
+    """Raise if the download misses part of the box, the run period or a record (DataMesh truncates silently)."""
     lon = ds["longitude"] if "longitude" in ds.coords else ds["lon"]
     lat = ds["latitude"] if "latitude" in ds.coords else ds["lat"]
-    dlon, dlat = float(abs(lon.diff(lon.dims[0])).median()), float(abs(lat.diff(lat.dims[0])).median())
+    dlon = float(abs(lon.diff(lon.dims[0])).median())
+    dlat = float(abs(lat.diff(lat.dims[0])).median())
+
+    # space: allow two grid cells less than requested
     want_lon = (bbox[2] - bbox[0]) % 360                  # span, also for a box crossing the seam
+    want_lat = bbox[3] - bbox[1]
     got_lon = float(lon.max() - lon.min())
     got_lat = float(lat.max() - lat.min())
-    assert got_lon >= want_lon - 2 * dlon, f"longitude span {got_lon:.2f} < requested {want_lon:.2f}"
-    assert got_lat >= (bbox[3] - bbox[1]) - 2 * dlat, f"latitude span {got_lat:.2f} < requested {bbox[3] - bbox[1]:.2f}"
-    assert ds.time.min() <= run_start, f"first record {ds.time.values.min()} is after the run start {run_start}"
-    assert ds.time.max() >= run_end, f"last record {ds.time.values.max()} is before the run end {run_end}"
+    if got_lon < want_lon - 2 * dlon:
+        raise ValueError(f"longitude span {got_lon:.2f} < requested {want_lon:.2f}")
+    if got_lat < want_lat - 2 * dlat:
+        raise ValueError(f"latitude span {got_lat:.2f} < requested {want_lat:.2f}")
+
+    # time: the run period is covered and no record is missing
+    times = pd.DatetimeIndex(ds.time.values)
+    if times[0] > run_start:
+        raise ValueError(f"first record {times[0]} is after the run start {run_start}")
+    if times[-1] < run_end:
+        raise ValueError(f"last record {times[-1]} is before the run end {run_end}")
+    steps = times.to_series().diff().dropna().unique()
+    if len(steps) != 1:
+        raise ValueError(f"time step is not regular, steps found: {list(steps)}")
+
+    # values: every variable has data
+    for name in ds.data_vars:
+        if ds[name].isnull().all():
+            raise ValueError(f"{name} is all NaN")
 
 
 def main():
+    config = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "download_bry.yaml"
+    with open(config) as f:
+        cfg = yaml.safe_load(f)
+    print(f"Read configuration {config}")
 
     dm = Connector()  # token from DATAMESH_TOKEN
-    print("Connected to Oceanum Datamesh successfully :)")
-
-    cfg = yaml.safe_load(open(CONFIG))
-    print('Reading configuration yaml file')
-
-    if "--list" in sys.argv:
-        for term in ("glorys", "mercator", "moana", "ocean hindcast"):
-            for ds in dm.get_catalog(search=term, timefilter=[cfg['START'], cfg['START']]):
-                print(f"{ds.id:50s} {ds.name}")
-        return
+    print('Just connected with data')
 
     run_start = pd.Timestamp(cfg['START'])
     run_end = pd.Timestamp(cfg['END']) + pd.Timedelta("1D")   # the run ends at midnight after END

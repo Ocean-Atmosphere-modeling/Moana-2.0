@@ -1,14 +1,20 @@
 """
 This script is to interpolate raw cmems initial condition file on roms grid
 With one condition that the roms grid should not be rotated with respect to the lon/lat lines.
+
+    python scripts/make_ic.py temp        # one of u, v, temp, salt (default salt)
+
+Also writes ic_zlevels_<var>_2026-01-01.nc next to the IC file: the field after the horizontal
+step only, still on the CMEMS levels, for scripts/plot_ic_vertical_check.py.
 """
 
+import sys
 import xarray as xr
 import xroms
 import numpy as np 
 import matplotlib.pyplot as plt 
 
-var = 'salt'                                          # ROMS variable to make: 'u', 'v', 'temp', 'salt'
+var = sys.argv[1] if len(sys.argv) > 1 else 'salt'   # ROMS variable to make: 'u', 'v', 'temp', 'salt'
 # ROMS variable: (CMEMS name, ROMS point type, long_name, units)
 VARS = {
     "u": ("uo", "u", "u-momentum component", "meter second-1"),
@@ -19,8 +25,10 @@ VARS = {
 VAR, pt, long_name, units = VARS[var]
 REF_TIME = "2026-01-01"                                      # TIME_REF in yaml suman: fix this later for yaml version
 grid_path = '/projects/f_omg_1/moa/moana/moana_grid_N50.nc'
-source_file = '/projects/f_omg_1/moa/moana/oceanum_input/initial_cond/ic_so_raw_2026-01-01.nc'
+SRC = {'uo': 'uo_vo', 'vo': 'uo_vo'}.get(VAR, VAR)          # uo and vo are in one raw file
+source_file = f'/projects/f_omg_1/moa/moana/oceanum_input/initial_cond/ic_{SRC}_raw_2026-01-01.nc'
 target_file = f'/projects/f_omg_1/moa/moana/oceanum_input/initial_cond/roms_ready/ic_{var}_2026-01-01.nc'
+check_file = f'/projects/f_omg_1/moa/moana/oceanum_input/initial_cond/roms_ready/ic_zlevels_{var}_2026-01-01.nc'
 
 g = xr.open_dataset(grid_path)
 g['zeta'] = xr.zeros_like(g.h)
@@ -38,10 +46,11 @@ def grid_points(grid, pt):
         lat=grid[f"lat_{pt}"].reset_coords(drop=True),
         mask=grid[f"mask_{pt}"].reset_coords(drop=True),
         dz=grid[f"dz{sfx}"].reset_coords(drop=True),
+        h=-grid[f"z_w{sfx}"].isel(s_w=0).reset_coords(drop=True),   # depth at this point type
     )
 
 p = grid_points(grid, pt)
-z, lon, lat, mask, dz = p["z"], p["lon"], p["lat"], p["mask"], p["dz"]
+z, lon, lat, mask, dz, h = p["z"], p["lon"], p["lat"], p["mask"], p["dz"], p["h"]
 
 
 # loading cmems input file
@@ -77,17 +86,29 @@ cm_f = cm_f.bfill(DEPTH)          # axis is deep -> surface, so "backward" = tow
 cm_f = flood_fill(cm_f)
 
 
+def horizontal(cm, lon, lat):
+    """CMEMS -> ROMS points (bilinear), on every CMEMS depth level."""
+    return cm.interp({LON: lon, LAT: lat})
+
+
+def vertical(cm_h, z):
+    """CMEMS depth levels -> ROMS s-levels, column by column.
+
+    np.interp holds the end values beyond the data: above CMEMS's top level and below its bottom level.
+    """
+    return xr.apply_ufunc(
+        np.interp, z, cm_h[DEPTH], cm_h,
+        input_core_dims=[["s_rho"], [DEPTH], [DEPTH]],
+        output_core_dims=[["s_rho"]],
+        vectorize=True,
+    )
+
+
 # 4. Horizontal: CMEMS -> ROMS u-points (bilinear), on every CMEMS depth level
-cm_h = cm_f.interp({LON: lon, LAT: lat})       # (depth, eta_rho, xi_u)
+cm_h = horizontal(cm_f, lon, lat)              # (depth, eta_rho, xi_u)
 
 # 5. Vertical: CMEMS depth levels -> ROMS s-levels, column by column
-# np.interp holds the end values beyond the data: above CMEMS's top level and below its bottom level
-da = xr.apply_ufunc(
-    np.interp, z, cm_h[DEPTH], cm_h,
-    input_core_dims=[["s_rho"], [DEPTH], [DEPTH]],
-    output_core_dims=[["s_rho"]],
-    vectorize=True,
-).transpose("s_rho", ...)
+da = vertical(cm_h, z).transpose("s_rho", ...)
 da.attrs = {"long_name": long_name, "units": units}   # not z's attributes
 
 da = da.where(mask ==1, 0)
@@ -134,3 +155,13 @@ out["ocean_time"].encoding = {"units": f"seconds since {REF_TIME}", "calendar": 
 out.to_netcdf(target_file)
 
 print('done with creating roms format data')
+
+# 8. Check file: the field after step 4 only (CMEMS levels), with the ROMS points' lon, lat, h, mask
+check = xr.Dataset({var: cm_h.reset_coords(drop=True), "lon": lon, "lat": lat, "h": h, "mask": mask})
+check = (check.rename({k: v for k, v in ROMS_DIMS[pt].items() if k in check.dims})
+              .drop_vars(["eta_rho", "xi_rho", "eta_u", "xi_u", "eta_v", "xi_v"], errors="ignore"))
+check.attrs = {"title": f"{var} after the horizontal interpolation only, on the CMEMS levels",
+               "source": source_file, "ic_file": target_file,
+               "note": "elevation is negative-up; h = depth at this point type; mask 1 = ocean"}
+check.to_netcdf(check_file)
+print(f"wrote {check_file}")

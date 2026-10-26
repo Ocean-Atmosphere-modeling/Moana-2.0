@@ -432,7 +432,7 @@ LtracerSponge == F F                            ! temperature, salinity, inert
 
       DSTART =199302
   TIDE_START =  0.0d0                      ! days
-    TIME_REF =  20100101.0d0                     ! yyyymmdd.dd
+    TIME_REF =  20260101.0d0                     ! yyyymmdd.dd
 
 ! Nudging/relaxation time scales, inverse scales will be computed
 ! internally, [1:Ngrids].
