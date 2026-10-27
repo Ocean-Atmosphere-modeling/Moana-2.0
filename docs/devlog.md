@@ -2,7 +2,56 @@
 
 Newest entry first.
 
+## 2026-10-27
+
+### Tide webpage: maths, phases and nodal corrections
+
+- Problem: reviewers of `webpage_folder/tide_page.html` asked for the maths
+  behind each step (complex form, transport / h, phase zero, nodal f and u,
+  ellipses), for Cmax and Cmin maps of the major constituents, for a Cphase
+  figure, and for a diagram of how ROMS reads the file.
+- Handling: the page now shows the equations (MathJax). Step 3 gives the
+  Doodson argument V, the nodal formulas from pyTMD (OTIS set), a table of
+  V, f and u for the 15 constituents, the drift of f and u over the run and
+  over one year, and a worked M2 example at Taranaki Bight that reproduces
+  the file values (Eamp 1.1355 m, Ephase 227.90°). New figure scripts:
+  `fig_cmax_cmin.py`, `fig_cphase.py`, `fig_point_current.py`.
+- Found in `ROMS/Utility/tides_date.F`: ROMS reads `zero_phase_date` from
+  the tide file and sets tide_start = zero_phase_date − TIME_REF itself.
+  TIDE_START in `moana.in` is then ignored. The page says this.
+- The grid file is now `/projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc`.
+  `webpage_folder/common.py` uses the new path. `scripts/make_tides.py`
+  still has the old path (❓ to change before the next tide file).
+- Over one year f and u drift (K2: 4 % and 5°), so a new tide file is made
+  for each run year with NODAL_DATE in its middle.
+
+### Old reference date removed
+
+- Problem: the old TIME_REF / REF_DATE of 2010 was still in `docs/devlog.md`,
+  `Apps/moana/params.yaml` (moana_in candidate), `misc_scripts/plot_tide_file.py`
+  and `webpage_folder/tide_page.html`.
+- Handling: all of them now give 2026-01-01, the model start, or do not give
+  the old date. `moana.in`, `make_bry.yaml`, `make_ic.py` and `make_tides.py`
+  already used 2026-01-01. The tide file on disk has zero_phase_date 20260101.
+
 ## 2026-10-26
+
+### Climatology file scripts
+
+- Problem: no script made the ROMS climatology file (CLMNAME). With the
+  `moana.in` switches, ROMS reads only u, v, temp and salt from it.
+- Handling: new `scripts/download_clm.py` (config `download_clm.yaml`) and
+  `scripts/make_clm.py`. The download is the IC request (full grid) for
+  START − 1 day to END + 2 days, one query per 31 days. `make_clm.py` uses
+  the `make_ic.py` method on each record and writes one file per variable.
+  The time names are the ROMS defaults: `v3d_time`, `temp_time`, `salt_time`.
+- Test: on the 2026-01-01 raw IC files (5 records), the first record agrees
+  with the IC files to 2e-6 °C and 3e-8 m/s. Each record takes approximately
+  3 s, and the peak memory is 2.1 GB.
+- Test of the download: one 1-day chunk of thetao (5 records, 160.6 to
+  185.4°E) took approximately 10 min. Thus the full download can take one
+  day or more. Two chunks that share one record give 9 records, not 10.
+- Record interval (6-hourly or daily) and use of nudging: (yet to decide).
 
 ### Webpage for make_tides.py
 
@@ -18,7 +67,7 @@ Newest entry first.
 ### Tide file: phase zero at the model start
 
 - Problem: `scripts/fetch_tpxo.py` was deleted, but `make_tides.py` needs
-  its output. In `make_tides.py`, REF_DATE was 2010-01-01, and GRID was
+  its output. In `make_tides.py`, REF_DATE was an old date, and GRID was
   `grd_moana5km.nc`. That file is not in `/projects/f_omg_1/moa/moana/` now.
 - Handling: `fetch_tpxo.py` is back from git. A new download is identical to
   `Input/tides/tpxo9_atlas_v5_moana.nc` (same DataMesh cache hash). TPXO has
@@ -27,7 +76,7 @@ Newest entry first.
   NODAL_DATE stays 2026-02-15. GRID is now `moana_grid_N50.nc`, which has the
   same lon, lat, h and mask (`make_N50_grid.py` changes only the vertical
   levels). `make_tides.py` wrote `Input/tides/moana_tides.nc` again.
-- Test: the old file (phase zero 2010) and the new file give the same
+- Test: the old file (old phase zero) and the new file give the same
   elevation on 2026-01-01, 2026-02-15 and 2026-03-31 (max |diff| < 1e-9 m).
   Amplitudes and Cmax are the same.
 - The tide files and `fetch_tpxo.log` are now in
@@ -89,11 +138,11 @@ Newest entry first.
 
 ### TIME_REF in moana.in
 
-- Problem: `Apps/moana/Runs/moana.in` had TIME_REF = 20100101.
+- Problem: `Apps/moana/Runs/moana.in` had an old TIME_REF.
 - Handling: TIME_REF is 20260101.0d0 now. DSTART (199302) is not changed.
   It is days since TIME_REF, so it must agree with the new TIME_REF.
-  `make_tides.py` (REF_DATE) and `make_bry.yaml` (TIME_REF) still use
-  2010-01-01. `make_ic.py` uses 2026-01-01.
+  `make_tides.py` (REF_DATE), `make_bry.yaml` (TIME_REF) and `make_ic.py`
+  use 2026-01-01.
 
 ### make_bry.py test (make_ic.py style)
 
@@ -149,11 +198,11 @@ Newest entry first.
   into ROMS is the same as in TPXO. Max Cmax is now 1.32 m/s (Cook Strait,
   h = 29 m). No cell has Cmax > 2 m/s. On the open edges, TPXO depth / ROMS
   h is 0.69 to 2.04, and Cmax is 0.26 m/s or less.
-- Output: `Input/tides/moana_tides.nc`. 15 constituents, REF_DATE
-  2010-01-01 (TIME_REF = 20100101 and TIDE_START = 0 in
-  `Apps/moana/Runs/moana.in`), NODAL_DATE 2026-02-15 (middle of the
+- Output: `Input/tides/moana_tides.nc`. 15 constituents, REF_DATE =
+  TIME_REF + TIDE_START in `Apps/moana/Runs/moana.in` (now 2026-01-01,
+  TIDE_START = 0), NODAL_DATE 2026-02-15 (middle of the
   boundary data on disk). Run time 15 s, memory 1 GB, no NaN. Eamp is up to
-  1.24 m (M2, Taranaki Bight). A ROMS sum 16 years after REF_DATE agrees
+  1.24 m (M2, Taranaki Bight). A ROMS sum many years after REF_DATE agrees
   with a direct sum to 1e-10 m.
 - `misc_scripts/plot_tide_file.py` makes `concept_figures/tide_file.png`:
   M2 and K1 amplitude and phase, and M2 Cmax.

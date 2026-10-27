@@ -8,7 +8,7 @@ from scipy.ndimage import distance_transform_edt
 HERE = Path(__file__).resolve().parent
 FIGURES = HERE / "figures"
 
-GRID = "/projects/f_omg_1/moa/moana/moana_grid_N50.nc"
+GRID = "/projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc"
 TPXO = "/projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/tpxo9_atlas_v5_moana.nc"
 TIDES = "/projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/moana_tides.nc"
 

@@ -73,5 +73,5 @@ time:
   start: (yet to decide)          # run period (M9-T1)
   end: (yet to decide)
   candidates:
-    moana_in: {TIME_REF: 20100101, DT: 100.0, NDTFAST: 44}
+    moana_in: {TIME_REF: 20260101, DT: 100.0, NDTFAST: 44}
   # moana_in: Runs/moana.in, the published configuration (not examined yet, M3-T2).

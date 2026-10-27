@@ -10,7 +10,7 @@ Writes concept_figures/tide_file.png. Three panels:
   middle  K1 elevation amplitude, phase every 30° (white lines)
   right   M2 current, ellipse semi-major axis (tide_Cmax)
 
-Phases are relative to zero_phase_date (2010-01-01), not Greenwich phases.
+Phases are relative to zero_phase_date (2026-01-01), not Greenwich phases.
 """
 from pathlib import Path
 
