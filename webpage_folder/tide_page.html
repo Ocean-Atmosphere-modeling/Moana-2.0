@@ -2,217 +2,222 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one reading column, like a lab notebook page; each step is a numbered block with "what" and "why" side by side on wide screens. */
+/* Field manual: one bright page, black ink, numbered paragraphs (2-4.), numbered figures and tables,
+   boxed NOTE / CAUTION / WARNING callouts, square corners, thick rules. Single light theme by choice. */
 :root {
-  --paper: #f4f7f8;      /* chart paper, slight blue bias */
-  --sheet: #ffffff;
-  --ink: #13232d;        /* deep water ink */
-  --muted: #546570;
-  --rule: #d5dee3;
-  --sea: #1d6f86;        /* water / data */
-  --sea-soft: #dcecf1;
-  --land: #c9c1b2;       /* same land colour as the figure */
-  --mark: #a3296c;       /* nautical-chart magenta, used for notes and the step numbers */
-  --mark-soft: #f6e4ee;
-  --code-bg: #eaf0f2;
-  --mat: #ffffff;        /* white mat behind the PNG figures, both themes */
-  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0d171d; --sheet: #13212a; --ink: #dce7ec; --muted: #93a6b1; --rule: #273a45;
-    --sea: #63bfd6; --sea-soft: #173341; --land: #5d574d; --mark: #e384b8; --mark-soft: #3a1d2d;
-    --code-bg: #182a34; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #0d171d; --sheet: #13212a; --ink: #dce7ec; --muted: #93a6b1; --rule: #273a45;
-  --sea: #63bfd6; --sea-soft: #173341; --land: #5d574d; --mark: #e384b8; --mark-soft: #3a1d2d;
-  --code-bg: #182a34; color-scheme: dark;
+  color-scheme: light;
+  --paper: #fdfdfa;        /* bright manual paper */
+  --panel: #f3f2ec;        /* code and procedure panels */
+  --ink: #141414;
+  --muted: #555b5e;
+  --rule: #141414;         /* heavy rules */
+  --hair: #cfcdc4;         /* light rules */
+  --accent: #b4461c;       /* burnt orange: numbers, cautions */
+  --warn: #a81e1e;         /* warning red */
+  --link: #1f4f7a;
+  --mat: #ffffff;
+  --head: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
 body {
   background: var(--paper); color: var(--ink);
-  font-family: var(--body); font-size: 17px; line-height: 1.62;
+  font-family: var(--body); font-size: 16.5px; line-height: 1.6;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 0 64px;
+  padding-block: 0 72px;
 }
-.wrap { max-width: 860px; margin: 0 auto; }
-.col { max-width: 68ch; }
-h1, h2, h3 { font-family: var(--display); font-weight: 650; text-wrap: balance; line-height: 1.2; margin: 0; }
-h1 { font-size: clamp(2rem, 5vw, 2.9rem); letter-spacing: -0.01em; }
-h2 { font-size: 1.65rem; }
-h3 { font-size: 1.15rem; font-weight: 500; }
+.wrap { max-width: 840px; margin: 0 auto; counter-reset: ch; }
 p { margin: 0; }
-a { color: var(--sea); }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
-code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 3px; }
-.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mark); }
+a { color: var(--link); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--mono); font-size: 0.85em; background: var(--panel); padding: 0.05em 0.3em; }
 .muted { color: var(--muted); }
 .stack { display: flex; flex-direction: column; gap: 1rem; }
+ul.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
 
-header { padding-block: 56px 28px; border-bottom: 1px solid var(--rule); }
-header .stack { gap: 1.1rem; }
-.lede { font-size: 1.15rem; }
-.toc { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: 0.92rem; padding: 0; margin: 0.4rem 0 0; list-style: none; }
-.toc a { text-decoration: none; border-bottom: 1px solid var(--rule); color: var(--ink); }
-.toc a:hover { border-color: var(--sea); }
+/* headings */
+h1, h2, h3, h4 { font-family: var(--head); font-weight: 700; line-height: 1.1; margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
+h1 { font-size: clamp(2.3rem, 6vw, 3.4rem); letter-spacing: 0.01em; }
+h2 { font-size: 1.9rem; }
+h3 { font-size: 1.3rem; letter-spacing: 0.03em; }
+h4 { font-size: 1.05rem; color: var(--muted); letter-spacing: 0.06em; }
+.chapter-label { font-family: var(--head); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
 
-section { padding-block: 44px 8px; }
-section > .stack { gap: 1.15rem; }
+/* cover block */
+.cover { margin-top: 36px; border-top: 4px solid var(--rule); border-bottom: 4px solid var(--rule); padding: 26px 0 22px; display: flex; flex-direction: column; gap: 14px; }
+.cover .line { font-family: var(--head); font-weight: 600; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.lede { font-size: 1.1rem; max-width: 70ch; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); border: 1.5px solid var(--rule); }
+.meta > div { padding: 8px 12px; border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); min-width: 0; }
+.meta .k { font-family: var(--head); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.meta .v { font-family: var(--mono); font-size: 0.8rem; word-break: break-all; }
 
-/* display maths: a boxed line, like a numbered equation in a notebook */
-.formula {
-  font-size: 1.05rem; text-align: center;
-  padding: 10px 12px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px;
-  overflow-x: auto;
-}
-.formula small { display: block; font-family: var(--body); font-size: 0.85rem; color: var(--muted); margin-top: 2px; text-align: left; }
-mjx-container[display="true"] { margin: 0.4em 0 !important; }
-.ww mjx-container[display="true"] { font-size: 0.95em; }
+/* contents */
+.contents { border-bottom: 1.5px solid var(--rule); padding: 18px 0 20px; }
+.contents h4 { margin-bottom: 8px; }
+.contents ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 32px; font-size: 0.95rem; }
+.contents li { break-inside: avoid; display: flex; gap: 10px; padding: 3px 0; border-bottom: 1px dotted var(--hair); }
+.contents li span:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); min-width: 2.6em; }
+.contents a { color: var(--ink); text-decoration: none; }
+.contents a:hover { text-decoration: underline; }
+@media (max-width: 600px) { .contents ol { columns: 1; } }
+
+/* chapters: each section is a chapter with its own paragraph, figure and table counters */
+section.chapter { padding-block: 44px 0; counter-increment: ch; counter-reset: para fig tbl; }
+section.chapter > .stack { gap: 1.2rem; }
+.chapter-head { border-bottom: 1.5px solid var(--rule); padding-bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
+h3.para::before { counter-increment: para; content: var(--chn) "-" counter(para) ". "; color: var(--accent); }
+h3.para { margin-top: 10px; }
+
+/* step banner inside chapter 2 */
+.step-banner { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; margin-top: 30px; border-top: 1.5px solid var(--rule); padding-top: 16px; }
+.step-banner .n { font-family: var(--head); font-weight: 700; font-size: 3rem; line-height: 1; color: var(--accent); padding: 0 8px; border: 2px solid var(--accent); }
+.step-banner h2 { font-size: 1.7rem; }
+.step-banner .lines { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); display: block; text-transform: none; letter-spacing: 0; }
+
+/* code */
+pre { margin: 0; background: var(--panel); border-left: 3px solid var(--rule); padding: 12px 14px; font-family: var(--mono); font-size: 0.8rem; line-height: 1.55; overflow-x: auto; color: var(--ink); }
+pre .c { color: var(--muted); }
+
+/* procedure blocks: WHAT (full width) then WHY (full width). No side-by-side. */
+.proc { display: flex; flex-direction: column; gap: 10px; }
+.proc .blk { border-left: 3px solid var(--hair); padding: 2px 0 2px 16px; display: flex; flex-direction: column; gap: 8px; }
+.proc .blk.why { border-left-color: var(--accent); }
+.proc .lbl { font-family: var(--head); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.proc .blk.why .lbl { color: var(--accent); }
+.proc p, .proc li { font-size: 0.97rem; }
+
+/* equations: full width, centred, no box */
+.eq { padding: 6px 0; overflow-x: auto; text-align: center; }
+.eq small { display: block; text-align: left; font-size: 0.86rem; color: var(--muted); margin-top: 2px; max-width: 72ch; }
+mjx-container[display="true"] { margin: 0.45em 0 !important; }
+
+/* callouts */
+.callout { border: 2px solid var(--rule); padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; font-size: 0.95rem; }
+.callout .lbl { font-family: var(--head); font-weight: 700; font-size: 0.9rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.callout.caution { border-color: var(--accent); }
+.callout.caution .lbl { color: var(--accent); }
+.callout.warning { border-color: var(--warn); border-width: 3px; }
+.callout.warning .lbl { color: var(--warn); }
+
+/* figures and tables */
+figure { margin: 0; counter-increment: fig; }
+figure .canvas { background: var(--mat); border: 1px solid var(--hair); padding: 14px; overflow-x: auto; }
+.plot { background: var(--mat); border: 1px solid var(--hair); padding: 8px; overflow-x: auto; }
+.plot img { display: block; width: 100%; height: auto; min-width: 560px; }
+.plot.wide img { min-width: 720px; }
+.plot.tall img { min-width: 0; max-width: 760px; margin: 0 auto; }
+figcaption { font-size: 0.88rem; color: var(--ink); margin-top: 8px; }
+figcaption::before { content: "Figure " var(--chn) "-" counter(fig) ". "; font-family: var(--head); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.06em; text-transform: uppercase; }
+svg text { font-family: var(--body); }
+
+.tbl { overflow-x: auto; border-top: 2px solid var(--rule); border-bottom: 2px solid var(--rule); background: var(--mat); counter-increment: tbl; }
+.tcap { font-family: var(--head); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 0 6px; }
+.tcap::before { content: "Table " var(--chn) "-" counter(tbl) ". "; color: var(--accent); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 7px 11px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--head); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1.5px solid var(--rule); }
+td.n { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+th.n { text-align: right; }
+td code { white-space: nowrap; }
+.group td { background: var(--panel); font-family: var(--head); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; padding-block: 4px; }
 
 /* in / out panel */
 .io { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
 .io > div { min-width: 0; }
-.io .box { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
-.io .arrow { align-self: center; font-family: var(--mono); color: var(--mark); font-size: 1.4rem; }
-.io ul { margin: 0; padding-left: 1.1em; font-size: 0.93rem; }
-.io .path { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); word-break: break-all; }
+.io .box { border: 1.5px solid var(--rule); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; background: var(--mat); }
+.io .arrow { align-self: center; font-family: var(--mono); color: var(--accent); font-size: 1.6rem; }
+.io ul { margin: 0; padding-left: 1.1em; font-size: 0.92rem; }
+.io .path { font-family: var(--mono); font-size: 0.76rem; color: var(--muted); word-break: break-all; }
 @media (max-width: 700px) { .io { grid-template-columns: 1fr; } .io .arrow { justify-self: center; transform: rotate(90deg); } }
 
-figure { margin: 0; }
-figure .canvas { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; overflow-x: auto; }
-.plot { background: var(--mat); border: 1px solid var(--rule); border-radius: 6px; padding: 8px; overflow-x: auto; }
-.plot img { display: block; width: 100%; height: auto; min-width: 560px; }
-.plot.wide img { min-width: 720px; }
-.plot.tall img { min-width: 0; max-width: 760px; margin: 0 auto; }
-figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 8px; }
-svg text { font-family: var(--body); }
+/* checks */
+.checks { display: flex; flex-direction: column; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.checks li { border: 1px solid var(--hair); background: var(--mat); padding: 10px 14px; display: grid; grid-template-columns: 170px 1fr; gap: 12px; font-size: 0.93rem; }
+.checks .k { font-family: var(--head); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--link); }
+@media (max-width: 600px) { .checks li { grid-template-columns: 1fr; gap: 2px; } }
 
-/* steps */
-.step { display: grid; grid-template-columns: 56px 1fr; gap: 0 18px; padding-block: 36px 4px; border-top: 1px solid var(--rule); }
-.step:first-of-type { border-top: 0; }
-.num { font-family: var(--display); font-size: 2.6rem; line-height: 1; color: var(--mark); font-weight: 500; font-variant-numeric: tabular-nums; }
-.step > .stack { min-width: 0; gap: 1rem; }
-.lines { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
-.ww { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.ww > div { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.ww .tag { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.ww .why { background: var(--mark-soft); border-radius: 6px; padding: 12px 14px; }
-.ww .why .tag { color: var(--mark); }
-.ww .what { background: var(--sea-soft); border-radius: 6px; padding: 12px 14px; }
-.ww .what .tag { color: var(--sea); }
-.ww p, .ww li { font-size: 0.95rem; }
-.ww ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 4px; }
-.ww .wide { grid-column: 1 / -1; }
-@media (max-width: 700px) { .ww { grid-template-columns: 1fr; } .step { grid-template-columns: 1fr; } .num { font-size: 2rem; } }
-
-pre {
-  margin: 0; background: var(--code-bg); border-radius: 6px; padding: 12px 14px;
-  font-family: var(--mono); font-size: 0.8rem; line-height: 1.55; overflow-x: auto; color: var(--ink);
-}
-pre .c { color: var(--muted); }
-
-.note { border-left: 3px solid var(--mark); padding: 2px 0 2px 14px; font-size: 0.95rem; }
-.note strong { color: var(--mark); }
-
-/* tables */
-.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
-th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-tr:last-child td { border-bottom: 0; }
-th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--paper); }
-td.n { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-th.n { text-align: right; }
-td code { white-space: nowrap; }
-.group td { background: var(--paper); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sea); padding-block: 5px; }
-
-.checks { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
-.checks li { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
-.checks .k { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
-.k.bad { color: var(--mark); }
-.k.ok { color: var(--sea); }
-
-/* flow diagram: how ROMS uses the file. One box per stage, arrows between them. */
-.flow { display: flex; flex-direction: column; align-items: stretch; }
-.fbox { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; display: grid; grid-template-columns: 170px 1fr; gap: 6px 16px; }
-.fbox.file { background: var(--sea-soft); border-color: var(--sea); }
-.fbox .where { font-family: var(--mono); font-size: 0.74rem; color: var(--mark); line-height: 1.5; word-break: break-word; }
-.fbox .where b { display: block; color: var(--ink); font-size: 0.86rem; font-family: var(--body); font-weight: 600; }
+/* flow diagram: how ROMS uses the file */
+.flow { display: flex; flex-direction: column; }
+.fbox { background: var(--mat); border: 1.5px solid var(--rule); padding: 12px 16px; display: grid; grid-template-columns: 180px 1fr; gap: 6px 16px; }
+.fbox.file { background: var(--panel); }
+.fbox .where { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); line-height: 1.5; word-break: break-word; }
+.fbox .where b { display: block; font-family: var(--head); font-weight: 700; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); }
 .fbox .body { min-width: 0; font-size: 0.93rem; display: flex; flex-direction: column; gap: 4px; }
 .fbox .body p { font-size: 0.93rem; }
-.fbox .body mjx-container[display="true"] { font-size: 0.95em; margin: 0.25em 0 !important; }
-.fbox .body ul { margin: 0; padding-left: 1.1em; }
-.fbox .body li { font-size: 0.9rem; }
-.farrow { align-self: center; color: var(--mark); font-size: 1.3rem; line-height: 1.6; text-align: center; }
-.farrow small { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; line-height: 1.3; }
+.fbox .body mjx-container[display="true"] { margin: 0.3em 0 !important; }
+.farrow { align-self: center; color: var(--accent); font-size: 1.4rem; line-height: 1.5; text-align: center; padding: 2px 0; }
+.farrow small { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); line-height: 1.3; }
 .fsplit { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .fsplit > .fbox { grid-template-columns: 1fr; }
 @media (max-width: 700px) { .fbox { grid-template-columns: 1fr; } .fsplit { grid-template-columns: 1fr; } }
 
-footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 0.85rem; color: var(--muted); }
+footer { margin-top: 56px; border-top: 4px solid var(--rule); padding-top: 14px; font-size: 0.85rem; color: var(--muted); }
 </style>
 <div class="wrap">
 
 <header>
-  <div class="stack">
-    <span class="eyebrow">Moana 2.0 · scripts/make_tides.py</span>
+  <div class="cover">
+    <div class="line"><span>Moana 2.0 · Field manual</span><span>Tide forcing file</span></div>
     <h1>How the Moana tide file is made</h1>
-    <p class="lede col">A step-by-step guide to <code>make_tides.py</code>. It takes the TPXO global tide model and turns it into the tide forcing file (<code>TIDENAME</code>) that ROMS reads. For every step we say what the code does, why it needs to, and the mathematics behind it, with figures made from the real Moana files.</p>
-    <ul class="toc">
-      <li><a href="#idea">The idea</a></li>
-      <li><a href="#io">Inputs and output</a></li>
-      <li><a href="#step1">1 · ROMS grid</a></li>
-      <li><a href="#step2">2 · Move TPXO to ROMS</a></li>
-      <li><a href="#step3">3 · Set the tide clock</a></li>
-      <li><a href="#step4">4 · Current ellipses</a></li>
-      <li><a href="#step5">5 · Write the file</a></li>
-      <li><a href="#result">The result</a></li>
-      <li><a href="#rom">How ROMS uses it</a></li>
-      <li><a href="#sync">Keep in sync</a></li>
-      <li><a href="#appendix">Appendix · ellipse maths</a></li>
-      <li><a href="#figs">Figure scripts</a></li>
-    </ul>
+    <p class="lede">A step-by-step guide to <code>make_tides.py</code>. It takes the TPXO global tide model and turns it into the tide forcing file (<code>TIDENAME</code>) that ROMS reads. For every step this manual gives what the code does, why it must, and the mathematics behind it, with figures made from the real Moana files.</p>
+    <div class="meta">
+      <div><div class="k">Script</div><div class="v">scripts/make_tides.py</div></div>
+      <div><div class="k">Input</div><div class="v">tpxo9_atlas_v5_moana.nc · moana_grid_N50.nc</div></div>
+      <div><div class="k">Output</div><div class="v">oceanum_input/tide_forcing/moana_tides.nc</div></div>
+      <div><div class="k">Phase zero · nodal date</div><div class="v">2026-01-01 · 2026-02-15</div></div>
+      <div><div class="k">Libraries</div><div class="v">pyTMD 3.0.9 · xarray · scipy</div></div>
+      <div><div class="k">Page updated</div><div class="v">2026-10-27</div></div>
+    </div>
+  </div>
+  <div class="contents">
+    <h4>Contents</h4>
+    <ol>
+      <li><span>1</span><a href="#ch1">General: the idea, inputs, outputs</a></li>
+      <li><span>2</span><a href="#ch2">Procedure: steps 1 to 5 of the script</a></li>
+      <li><span>2-6</span><a href="#step3">Set the tide clock (nodal corrections)</a></li>
+      <li><span>2-11</span><a href="#step4">Current ellipses</a></li>
+      <li><span>3</span><a href="#ch3">Result and checks</a></li>
+      <li><span>4</span><a href="#ch4">How ROMS uses the file</a></li>
+      <li><span>5</span><a href="#ch5">Settings to keep in sync</a></li>
+      <li><span>A</span><a href="#appa">Appendix A: ellipse mathematics</a></li>
+      <li><span>B</span><a href="#appb">Appendix B: figure scripts</a></li>
+    </ol>
   </div>
 </header>
 
-<section id="idea">
-  <div class="stack col">
-    <span class="eyebrow">Background</span>
-    <h2>The idea: a tide is a sum of simple waves</h2>
+<!-- ============================ CHAPTER 1 ============================ -->
+<section class="chapter" id="ch1" style="--chn:'1'">
+  <div class="stack">
+    <div class="chapter-head"><span class="chapter-label">Chapter 1</span><h2>General</h2></div>
+
+    <h3 class="para">The idea: a tide is a sum of simple waves</h3>
     <p>The Moon and the Sun pull on the ocean with a few fixed rhythms. The biggest one, called <strong>M2</strong>, repeats every 12.42 hours (the Moon passes overhead about twice a day). Others repeat every 12 hours (<strong>S2</strong>, the Sun), about every 24 hours (<strong>K1</strong>, <strong>O1</strong>), and so on. Each rhythm is called a <em>tidal constituent</em>.</p>
     <p>The period of each constituent is the same everywhere on Earth, because it comes from astronomy. Two things change from place to place:</p>
-    <ul style="margin:0;padding-left:1.2em">
+    <ul class="plain">
       <li><strong>Amplitude</strong> \(A\): how high the wave is at that place (in metres for sea level, m/s for current).</li>
       <li><strong>Phase</strong> \(\phi\): when the high water of that wave arrives, given as an angle from 0° to 360°.</li>
     </ul>
     <p>If you know the amplitude and phase of each constituent at a point, you can rebuild the tide there at any time by adding the waves together. This is exactly the sum ROMS computes:</p>
-  </div>
-  <div class="formula" style="margin-top:18px">
-    $$\zeta(t)=\sum_{k=1}^{15} E_k\,\cos\!\big(\omega_k\,t-\varphi_k\big),\qquad \omega_k=\frac{2\pi}{T_k}$$
-    <small>\(\zeta\) is sea level, \(E_k\) the amplitude (<code>tide_Eamp</code>), \(\varphi_k\) the phase (<code>tide_Ephase</code>), \(T_k\) the period (<code>tide_period</code>) and \(t\) the time since the phase-zero date (step 3). The nodal factor \(f_k\) of step 3 is already inside \(E_k\).</small>
-  </div>
-  <figure style="margin-top:18px">
-    <div class="canvas"><svg id="springNeap" viewBox="0 0 760 230" width="100%" role="img" aria-label="Two waves, M2 and S2, and their sum over 30 days, showing spring and neap tides"></svg></div>
-    <figcaption>Illustration only, not Moana data: M2 with amplitude 1.0 m and S2 with amplitude 0.35 m, both phase 0. The magenta line is S2 alone. Their sum (dark line) gives big tides when the two waves line up (spring tide) and small tides when they cancel (neap tide), every 14.8 days. The real Moana version of this is in <a href="#result">the result</a>.</figcaption>
-  </figure>
-  <div class="stack col" style="margin-top:18px">
+    <div class="eq">
+      $$\zeta(t)=\sum_{k=1}^{15} E_k\,\cos\!\big(\omega_k\,t-\varphi_k\big),\qquad \omega_k=\frac{2\pi}{T_k}$$
+      <small>\(\zeta\) is sea level, \(E_k\) the amplitude (<code>tide_Eamp</code>), \(\varphi_k\) the phase (<code>tide_Ephase</code>), \(T_k\) the period (<code>tide_period</code>) and \(t\) the time since the phase-zero date (paragraph 2-6). The nodal factor \(f_k\) of paragraph 2-9 is already inside \(E_k\).</small>
+    </div>
+    <figure>
+      <div class="canvas"><svg id="springNeap" viewBox="0 0 760 230" width="100%" role="img" aria-label="Two waves, M2 and S2, and their sum over 30 days, showing spring and neap tides"></svg></div>
+      <figcaption>Illustration only, not Moana data: M2 with amplitude 1.0 m and S2 with amplitude 0.35 m, both phase 0. The orange line is S2 alone. Their sum (black line) gives big tides when the two waves line up (spring tide) and small tides when they cancel (neap tide), every 14.8 days. The real Moana version of this is in chapter 3.</figcaption>
+    </figure>
     <p><strong>TPXO</strong> (here TPXO9-atlas-v5, from Oregon State University) is a global tide model that has already worked out the amplitude and phase of each constituent, for sea level and for currents, on a 1/30° grid (about 3 km). ROMS cannot read TPXO as it is. It needs the same information on <em>its own</em> grid, with phases measured from <em>its own</em> clock, and with currents written as ellipses. <code>make_tides.py</code> does that translation. It is a Python version of the MATLAB OTPS scripts in Code-Commons (<code>process_tides_GOG.m</code> → <code>otps2frc_v7.m</code>), with pyTMD in place of t_tide and xarray in place of the OTPS program <code>extract_HC</code>.</p>
-  </div>
-</section>
 
-<section id="io">
-  <div class="stack">
-    <span class="eyebrow">At a glance</span>
-    <h2>What goes in, what comes out</h2>
+    <h3 class="para">What goes in, what comes out</h3>
     <div class="io">
       <div class="box">
-        <h3>TPXO cut for the Moana box</h3>
+        <h4>TPXO cut for the Moana box</h4>
         <span class="path">oceanum_input/tide_forcing/tpxo9_atlas_v5_moana.nc</span>
         <ul>
           <li>Made by <code>scripts/fetch_tpxo.py</code> from DataMesh</li>
@@ -221,7 +226,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
           <li><code>uRe</code>, <code>uIm</code>, <code>vRe</code>, <code>vIm</code>: currents [m/s]</li>
           <li><code>dep</code>: TPXO water depth [m]</li>
         </ul>
-        <h3 style="margin-top:6px">ROMS grid</h3>
+        <h4 style="margin-top:6px">ROMS grid</h4>
         <span class="path">/projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc</span>
         <ul>
           <li><code>lon_rho</code>, <code>lat_rho</code>, <code>mask_rho</code>, <code>h</code></li>
@@ -229,7 +234,7 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
       </div>
       <div class="arrow" aria-hidden="true">→</div>
       <div class="box">
-        <h3>ROMS tide forcing file</h3>
+        <h4>ROMS tide forcing file</h4>
         <span class="path">oceanum_input/tide_forcing/moana_tides.nc</span>
         <ul>
           <li>15 constituents on the 467 × 397 ROMS rho grid (174,292 water points)</li>
@@ -245,66 +250,65 @@ footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
       <figcaption>The TPXO input as it comes from DataMesh, on its own grid. Left: M2 amplitude. Right: TPXO water depth. The magenta line is the edge of the ROMS grid. The TPXO box is a little bigger than the ROMS grid on every side, so every ROMS point has TPXO cells around it.</figcaption>
     </figure>
 
-    <h3>Why TPXO stores sea level as a real and an imaginary part</h3>
-    <p class="col">TPXO does not store amplitude \(A\) and phase \(G\) directly. It stores each constituent as one complex number \(z\), whose size is the amplitude and whose angle is minus the phase:</p>
-    <div class="formula">
+    <h3 class="para">Why TPXO stores sea level as a real and an imaginary part</h3>
+    <p>TPXO does not store amplitude \(A\) and phase \(G\) directly. It stores each constituent as one complex number \(z\), whose size is the amplitude and whose angle is minus the phase:</p>
+    <div class="eq">
       $$z = A\,e^{-iG} = \underbrace{A\cos G}_{\texttt{hRe}} \;-\; i\,\underbrace{A\sin G}_{-\texttt{hIm}},\qquad A=|z|,\qquad G=-\arg z$$
       <small>The minus sign is the TPXO/OTIS convention: \(G\) is a phase <em>lag</em>. With it, the sea level of that constituent is \(\zeta(t)=\operatorname{Re}\!\big(z\,e^{i\omega t}\big)=A\cos(\omega t-G)\).</small>
     </div>
-    <p class="col">The reason is that a phase is an angle, and angles cannot be added or averaged like ordinary numbers. Halfway between 350° and 10° is 0°, but the plain average is 180°. The complex number has no such jump: averaging \(e^{-i350°}\) and \(e^{-i10°}\) gives a number at angle 0°, as it should. So every operation that mixes neighbouring values (interpolation) or shifts the clock (step 3) is done on \(z\), and amplitude and phase are read off only at the very end (step 5). The script keeps sea level and both current parts in this complex form until step 4.</p>
+    <p>The reason is that a phase is an angle, and angles cannot be added or averaged like ordinary numbers. Halfway between 350° and 10° is 0°, but the plain average is 180°. The complex number has no such jump: averaging \(e^{-i350°}\) and \(e^{-i10°}\) gives a number at angle 0°, as it should. So every operation that mixes neighbouring values (interpolation) or shifts the clock (step 3) is done on \(z\), and amplitude and phase are read off only at the very end (step 5). The script keeps sea level and both current parts in this complex form until step 4.</p>
+
+    <h3 class="para">The pipeline</h3>
+    <figure>
+      <div class="canvas"><svg viewBox="0 0 820 132" width="100%" style="min-width:640px" role="img" aria-label="Pipeline: TPXO cut, fill land, interpolate to ROMS grid, nodal and clock correction, current ellipses, mask land and write">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill:var(--ink)"/></marker></defs>
+        <g style="font-size:12.5px">
+          <g transform="translate(4,30)"><rect width="112" height="60" style="fill:var(--panel);stroke:var(--ink);stroke-width:1.5"/><text x="56" y="26" text-anchor="middle" style="fill:var(--ink);font-weight:600">TPXO cut</text><text x="56" y="44" text-anchor="middle" style="fill:var(--muted)">z = Re + i·Im</text></g>
+          <g transform="translate(144,30)"><rect width="112" height="60" style="fill:var(--mat);stroke:var(--ink)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--accent);font-size:11px;font-weight:600">STEP 2</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">Fill TPXO land</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">nearest water</text></g>
+          <g transform="translate(284,30)"><rect width="112" height="60" style="fill:var(--mat);stroke:var(--ink)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--accent);font-size:11px;font-weight:600">STEP 2</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">Bilinear to</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">ROMS rho points</text></g>
+          <g transform="translate(424,30)"><rect width="112" height="60" style="fill:var(--mat);stroke:var(--ink)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--accent);font-size:11px;font-weight:600">STEP 3</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">× f·e^{i(V+u)}</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">tide clock</text></g>
+          <g transform="translate(564,30)"><rect width="112" height="60" style="fill:var(--mat);stroke:var(--ink)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--accent);font-size:11px;font-weight:600">STEP 4</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">u, v → ellipse</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">Cmax Cmin …</text></g>
+          <g transform="translate(704,30)"><rect width="112" height="60" style="fill:var(--panel);stroke:var(--ink);stroke-width:1.5"/><text x="56" y="16" text-anchor="middle" style="fill:var(--accent);font-size:11px;font-weight:600">STEP 5</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink);font-weight:600">moana_tides.nc</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">land = 0</text></g>
+          <g style="stroke:var(--ink);stroke-width:1.4" marker-end="url(#ar)"><line x1="118" y1="60" x2="141" y2="60"/><line x1="258" y1="60" x2="281" y2="60"/><line x1="398" y1="60" x2="421" y2="60"/><line x1="538" y1="60" x2="561" y2="60"/><line x1="678" y1="60" x2="701" y2="60"/></g>
+          <text x="340" y="116" text-anchor="middle" style="fill:var(--muted);font-size:11.5px">step 1 (read the ROMS grid) gives the target points, the mask and h</text>
+          <path d="M200 100 C 200 112, 480 112, 480 100" style="fill:none;stroke:var(--hair)"/>
+        </g>
+      </svg></div>
+      <figcaption>The five steps of the script. Everything stays complex until step 4.</figcaption>
+    </figure>
   </div>
-  <figure style="margin-top:24px">
-    <div class="canvas"><svg viewBox="0 0 820 132" width="100%" style="min-width:640px" role="img" aria-label="Pipeline: TPXO cut, fill land, interpolate to ROMS grid, nodal and clock correction, current ellipses, mask land and write">
-      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill:var(--muted)"/></marker></defs>
-      <g style="font-size:12.5px">
-        <g transform="translate(4,30)"><rect width="112" height="60" rx="5" style="fill:var(--sea-soft);stroke:var(--sea)"/><text x="56" y="26" text-anchor="middle" style="fill:var(--ink);font-weight:600">TPXO cut</text><text x="56" y="44" text-anchor="middle" style="fill:var(--muted)">z = Re + i·Im</text></g>
-        <g transform="translate(144,30)"><rect width="112" height="60" rx="5" style="fill:var(--sheet);stroke:var(--rule)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--mark);font-size:11px">2</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">Fill TPXO land</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">nearest water</text></g>
-        <g transform="translate(284,30)"><rect width="112" height="60" rx="5" style="fill:var(--sheet);stroke:var(--rule)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--mark);font-size:11px">2</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">Bilinear to</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">ROMS rho points</text></g>
-        <g transform="translate(424,30)"><rect width="112" height="60" rx="5" style="fill:var(--sheet);stroke:var(--rule)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--mark);font-size:11px">3</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">× f·e^{i(V+u)}</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">tide clock</text></g>
-        <g transform="translate(564,30)"><rect width="112" height="60" rx="5" style="fill:var(--sheet);stroke:var(--rule)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--mark);font-size:11px">4</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink)">u, v → ellipse</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">Cmax Cmin …</text></g>
-        <g transform="translate(704,30)"><rect width="112" height="60" rx="5" style="fill:var(--sea-soft);stroke:var(--sea)"/><text x="56" y="16" text-anchor="middle" style="fill:var(--mark);font-size:11px">5</text><text x="56" y="34" text-anchor="middle" style="fill:var(--ink);font-weight:600">moana_tides.nc</text><text x="56" y="50" text-anchor="middle" style="fill:var(--muted)">land = 0</text></g>
-        <g style="stroke:var(--muted);stroke-width:1.4" marker-end="url(#ar)"><line x1="118" y1="60" x2="141" y2="60"/><line x1="258" y1="60" x2="281" y2="60"/><line x1="398" y1="60" x2="421" y2="60"/><line x1="538" y1="60" x2="561" y2="60"/><line x1="678" y1="60" x2="701" y2="60"/></g>
-        <text x="340" y="116" text-anchor="middle" style="fill:var(--muted);font-size:11.5px">step 1 (read the ROMS grid) gives the target points, the mask and h</text>
-        <path d="M200 100 C 200 112, 480 112, 480 100" style="fill:none;stroke:var(--rule)"/>
-      </g>
-    </svg></div>
-    <figcaption>The numbers on the boxes are the step numbers in the script. Everything stays complex until step 4.</figcaption>
-  </figure>
 </section>
 
-<section id="steps" style="padding-top:20px">
+<!-- ============================ CHAPTER 2 ============================ -->
+<section class="chapter" id="ch2" style="--chn:'2'">
+  <div class="stack">
+    <div class="chapter-head"><span class="chapter-label">Chapter 2</span><h2>Procedure</h2></div>
+    <p>The script has five numbered blocks (<code># %% 1.</code> to <code># %% 5.</code>). Each is a step below. Line numbers refer to <code>scripts/make_tides.py</code>.</p>
 
-  <article class="step" id="step1">
-    <div class="num">1</div>
-    <div class="stack">
-      <h2>Read the ROMS grid</h2>
-      <span class="lines">scripts/make_tides.py:31–36</span>
+    <!-- STEP 1 -->
+    <div class="step-banner" id="step1"><div class="n">1</div><div><h2>Read the ROMS grid</h2><span class="lines">scripts/make_tides.py:31–36</span></div></div>
 <pre>grid = xr.open_dataset(GRID)
 water = grid.mask_rho.values == 1
 lon = xr.DataArray(grid.lon_rho.values % 360, dims=("eta_rho", "xi_rho"))
 lat = xr.DataArray(grid.lat_rho.values, dims=("eta_rho", "xi_rho"))
 h = xr.DataArray(grid.h.values, dims=("eta_rho", "xi_rho"))</pre>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <ul>
-            <li>Opens the ROMS grid file <code>moana_grid_N50.nc</code>.</li>
-            <li>Keeps the water mask, the longitude and latitude of every rho point, and the ROMS depth <code>h</code>.</li>
-            <li>Writes longitudes in the 0–360° form (<code>% 360</code>), so 179°W becomes 181°.</li>
-          </ul>
-        </div>
-        <div class="why"><span class="tag">Why</span>
-          <p>The rho points are where ROMS wants the tide values. The mask is used at the end to set land to zero. <code>h</code> is needed to turn TPXO transport into current (step 2d).</p>
-          <p>The Moana domain crosses the 180° line (it runs to 185°E). The TPXO cut runs from 160° to 186°, so ROMS points east of 180° must also be written as 180°–186°. If not, they would fall outside the TPXO box. The current grid file already uses 0–360°, so here <code>% 360</code> is only a safety step.</p>
-        </div>
+    <h3 class="para">Grid, mask, depth and longitude form</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <ul class="plain">
+          <li>Opens the ROMS grid file <code>moana_grid_N50.nc</code>.</li>
+          <li>Keeps the water mask, the longitude and latitude of every rho point, and the ROMS depth <code>h</code>.</li>
+          <li>Writes longitudes in the 0–360° form (<code>% 360</code>), so 179°W becomes 181°.</li>
+        </ul>
+      </div>
+      <div class="blk why"><span class="lbl">Why</span>
+        <p>The rho points are where ROMS wants the tide values. The mask is used at the end to set land to zero. <code>h</code> is needed to turn TPXO transport into current (paragraph 2-5).</p>
+        <p>The Moana domain crosses the 180° line (it runs to 185°E). The TPXO cut runs from 160° to 186°, so ROMS points east of 180° must also be written as 180°–186°. If not, they would fall outside the TPXO box. The current grid file already uses 0–360°, so here <code>% 360</code> is only a safety step.</p>
       </div>
     </div>
-  </article>
 
-  <article class="step" id="step2">
-    <div class="num">2</div>
-    <div class="stack">
-      <h2>Move the TPXO harmonics onto the ROMS grid</h2>
-      <span class="lines">scripts/make_tides.py:38–53</span>
+    <!-- STEP 2 -->
+    <div class="step-banner" id="step2"><div class="n">2</div><div><h2>Move the TPXO harmonics onto the ROMS grid</h2><span class="lines">scripts/make_tides.py:38–53</span></div></div>
 <pre>tpxo = xr.open_dataset(TPXO).sel(con=CONSTITUENTS)
 
 def harmonics(var, scale=1.0):
@@ -316,88 +320,81 @@ def harmonics(var, scale=1.0):
 z = harmonics("h")
 u, v = harmonics("u", tpxo.dep) / h, harmonics("v", tpxo.dep) / h</pre>
 
-      <h3>2a. Pick the constituents and make complex numbers</h3>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <p>Selects the 15 constituents in <code>CONSTITUENTS</code> and joins each Re/Im pair into one complex number per constituent \(k\) and per TPXO cell:</p>
-          $$z_k=\texttt{hRe}_k+i\,\texttt{hIm}_k,\qquad u_k=\texttt{uRe}_k+i\,\texttt{uIm}_k,\qquad v_k=\texttt{vRe}_k+i\,\texttt{vIm}_k$$
-        </div>
-        <div class="why"><span class="tag">Why</span>
-          <p>We use all 15 that TPXO gives (the MATLAB version used 12). From here on, every operation acts on \(z\), \(u\) and \(v\) as complex numbers, so amplitude and phase travel together and the phase never has to be averaged as an angle.</p>
-        </div>
-        <div class="wide">
-          <p>Bilinear interpolation (2c) is a weighted sum of the four TPXO cells \(j\) around a ROMS point, with weights \(w_j\) that add to 1. On the complex numbers it is</p>
-          $$z_{\text{ROMS}}=\sum_{j=1}^{4} w_j\,z_j=\sum_{j=1}^{4} w_j\,A_j\,e^{-iG_j},\qquad\text{then}\qquad E=|z_{\text{ROMS}}|,\quad \varphi=-\arg z_{\text{ROMS}}.$$
-          <p>The same sum applied to the phases themselves, \(\sum w_j G_j\), would go wrong wherever the four \(G_j\) straddle 0°/360°, and this happens along every co-phase line that crosses 0° (see the phase lines in <a href="#result">the result</a>). The complex sum has no such line.</p>
-        </div>
+    <h3 class="para">Pick the constituents and make complex numbers</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <p>Selects the 15 constituents in <code>CONSTITUENTS</code> and joins each Re/Im pair into one complex number per constituent \(k\) and per TPXO cell:</p>
+        <div class="eq">$$z_k=\texttt{hRe}_k+i\,\texttt{hIm}_k,\qquad u_k=\texttt{uRe}_k+i\,\texttt{uIm}_k,\qquad v_k=\texttt{vRe}_k+i\,\texttt{vIm}_k$$</div>
       </div>
-
-      <h3>2b. Fill TPXO land with the nearest TPXO water</h3>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <p><code>distance_transform_edt</code> finds, for every TPXO land cell, the closest TPXO water cell. The land cell then takes that value. This is done for all constituents at once, with the land mask of the first one.</p>
-        </div>
-        <div class="why"><span class="tag">Why</span>
-          <p>The TPXO coastline and the ROMS coastline are not the same. Bilinear interpolation uses the 4 TPXO cells around a point, and one missing cell makes the result missing (NaN). In Moana, <strong>354 of the 174,292 ROMS water points</strong> (0.2%) have at least one TPXO land cell among their 4. After the fill, all of them get a real value. (The MATLAB version filled only the boundary rows.)</p>
-        </div>
+      <div class="blk why"><span class="lbl">Why</span>
+        <p>We use all 15 that TPXO gives (the MATLAB version used 12). From here on, every operation acts on \(z\), \(u\) and \(v\) as complex numbers, so amplitude and phase travel together and the phase never has to be averaged as an angle. Bilinear interpolation (paragraph 2-4) is a weighted sum of the four TPXO cells \(j\) around a ROMS point, with weights \(w_j\) that add to 1. On the complex numbers it is</p>
+        <div class="eq">$$z_{\text{ROMS}}=\sum_{j=1}^{4} w_j\,z_j=\sum_{j=1}^{4} w_j\,A_j\,e^{-iG_j},\qquad\text{then}\qquad E=|z_{\text{ROMS}}|,\quad \varphi=-\arg z_{\text{ROMS}}.$$</div>
+        <p>The same sum applied to the phases themselves, \(\sum w_j G_j\), would go wrong wherever the four \(G_j\) straddle 0°/360°, and this happens along every co-phase line that crosses 0° (see the phase lines in chapter 3). The complex sum has no such line.</p>
       </div>
-      <figure>
-        <div class="plot"><img src="figures/coast_fill.png" alt="Zoom on Cook Strait. Left: TPXO cells coloured water or land, ROMS water points as dots, and ringed points along the coast that touch TPXO land. Right: M2 amplitude after the fill, with blocky copied values on TPXO land and the TPXO coastline in white"></div>
-        <figcaption>Cook Strait. Left: the TPXO cells (blue water, sand land) and the ROMS water points (dots). Ringed points sit next to TPXO land; without the fill they would get NaN. Right: M2 amplitude on the TPXO grid after the fill. The blocks inside the white TPXO coastline are copied water values. Only the ones next to the coast are ever used. The low amplitude in the middle of the strait is real (see <a href="#result">the result</a>).</figcaption>
-      </figure>
-
-      <h3>2c. Bilinear interpolation to the ROMS points</h3>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <p><code>hc.interp(lon=lon, lat=lat)</code> takes the 4 TPXO cells around each ROMS rho point and makes the distance-weighted mean written in 2a.</p>
-        </div>
-        <div class="why"><span class="tag">Why</span>
-          <p>TPXO is on a 1/30° (about 3 km) grid and ROMS is on a 5 km grid, so their points do not match (left panel above). TPXO is finer than ROMS and changes smoothly in the open ocean, so a simple bilinear step is enough.</p>
-        </div>
-      </div>
-
-      <h3>2d. Currents from TPXO transport and ROMS depth</h3>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <p>TPXO gives a depth-mean velocity \(u_T\) on its own depth \(H_T\) (<code>dep</code>). The script turns it back into a volume transport per unit width, interpolates that, and divides by the ROMS depth \(h_R\):</p>
-          $$U_T = u_T\,H_T\ \ [\mathrm{m^2/s}],\qquad U_R=\mathcal{I}\big[U_T\big],\qquad u_R=\frac{U_R}{h_R}$$
-          <p>\(\mathcal{I}\) is the fill-and-interpolate of 2b and 2c. The same is done for \(v\). All of this is on the complex harmonics, so the phase of the current goes along unchanged.</p>
-        </div>
-        <div class="why"><span class="tag">Why</span>
-          <p>The two models do not have the same sea floor. South of Stewart Island the TPXO depth is 7 to 16 m, but ROMS \(h\) is 130 to 160 m. The same transport through a layer ten times thinner means a current ten times faster. Transport is the quantity the two models should agree on, because it is what carries the tide wave across the open boundary. Dividing it by \(h_R\) gives the current that moves that same volume through the ROMS water column.</p>
-          <p>Where the two depths agree, \(u_R=u_T\) exactly. Where they do not, \(u_R/u_T=H_T/h_R\) (left panel below).</p>
-        </div>
-      </div>
-      <figure>
-        <div class="plot wide"><img src="figures/depth_currents.png" alt="Three maps. Left: ratio of TPXO depth to ROMS depth, near 1 in most places, with strong blue patches south of Stewart Island. Middle: M2 peak current from TPXO velocity, with bright spots above 2 m/s on the Stewart Island shelf. Right: M2 peak current from transport divided by ROMS h, with no spots above 1.4 m/s"></div>
-        <figcaption>Left: TPXO depth ÷ ROMS <code>h</code> (white = same depth, blue = TPXO shallower). Middle and right: M2 peak current (Cmax) on the ROMS grid, before the nodal correction. From the TPXO velocity, the largest M2 current is <strong>10.05 m/s</strong> and <strong>53 points</strong> are above 2 m/s, all on the shallow TPXO patches. From transport ÷ ROMS <code>h</code>, the largest is <strong>1.36 m/s</strong> (Cook Strait) and no point is above 2 m/s. Away from these patches the two panels are almost the same.</figcaption>
-      </figure>
-      <p class="note"><strong>Status.</strong> "Currents = TPXO transport / ROMS h" is a proposed choice (see <code>docs/devlog.md</code>). The MATLAB version used the TPXO velocity as it is. On the open edges of the domain, TPXO depth / ROMS <code>h</code> is 0.69 to 2.04.</p>
     </div>
-  </article>
 
-  <article class="step" id="step3">
-    <div class="num">3</div>
-    <div class="stack">
-      <h2>Set the tide clock: nodal corrections and phase zero</h2>
-      <span class="lines">scripts/make_tides.py:55–64</span>
+    <h3 class="para">Fill TPXO land with the nearest TPXO water</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <p><code>distance_transform_edt</code> finds, for every TPXO land cell, the closest TPXO water cell. The land cell then takes that value. This is done for all constituents at once, with the land mask of the first one.</p>
+      </div>
+      <div class="blk why"><span class="lbl">Why</span>
+        <p>The TPXO coastline and the ROMS coastline are not the same. Bilinear interpolation uses the 4 TPXO cells around a point, and one missing cell makes the result missing (NaN). In Moana, <strong>354 of the 174,292 ROMS water points</strong> (0.2%) have at least one TPXO land cell among their 4. After the fill, all of them get a real value. (The MATLAB version filled only the boundary rows.)</p>
+      </div>
+    </div>
+    <figure>
+      <div class="plot"><img src="figures/coast_fill.png" alt="Zoom on Cook Strait. Left: TPXO cells coloured water or land, ROMS water points as dots, and ringed points along the coast that touch TPXO land. Right: M2 amplitude after the fill, with blocky copied values on TPXO land and the TPXO coastline in white"></div>
+      <figcaption>Cook Strait. Left: the TPXO cells (blue water, sand land) and the ROMS water points (dots). Ringed points sit next to TPXO land; without the fill they would get NaN. Right: M2 amplitude on the TPXO grid after the fill. The blocks inside the white TPXO coastline are copied water values. Only the ones next to the coast are ever used. The low amplitude in the middle of the strait is real (see chapter 3).</figcaption>
+    </figure>
+
+    <h3 class="para">Bilinear interpolation to the ROMS points</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <p><code>hc.interp(lon=lon, lat=lat)</code> takes the 4 TPXO cells around each ROMS rho point and makes the distance-weighted mean written in paragraph 2-2.</p>
+      </div>
+      <div class="blk why"><span class="lbl">Why</span>
+        <p>TPXO is on a 1/30° (about 3 km) grid and ROMS is on a 5 km grid, so their points do not match (left panel above). TPXO is finer than ROMS and changes smoothly in the open ocean, so a simple bilinear step is enough.</p>
+      </div>
+    </div>
+
+    <h3 class="para">Currents from TPXO transport and ROMS depth</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <p>TPXO gives a depth-mean velocity \(u_T\) on its own depth \(H_T\) (<code>dep</code>). The script turns it back into a volume transport per unit width, interpolates that, and divides by the ROMS depth \(h_R\):</p>
+        <div class="eq">$$U_T = u_T\,H_T\ \ [\mathrm{m^2/s}],\qquad U_R=\mathcal{I}\big[U_T\big],\qquad u_R=\frac{U_R}{h_R}$$</div>
+        <p>\(\mathcal{I}\) is the fill-and-interpolate of paragraphs 2-3 and 2-4. The same is done for \(v\). All of this is on the complex harmonics, so the phase of the current goes along unchanged.</p>
+      </div>
+      <div class="blk why"><span class="lbl">Why</span>
+        <p>The two models do not have the same sea floor. South of Stewart Island the TPXO depth is 7 to 16 m, but ROMS \(h\) is 130 to 160 m. The same transport through a layer ten times thinner means a current ten times faster. Transport is the quantity the two models should agree on, because it is what carries the tide wave across the open boundary. Dividing it by \(h_R\) gives the current that moves that same volume through the ROMS water column. Where the two depths agree, \(u_R=u_T\) exactly. Where they do not, \(u_R/u_T=H_T/h_R\) (left panel below).</p>
+      </div>
+    </div>
+    <figure>
+      <div class="plot wide"><img src="figures/depth_currents.png" alt="Three maps. Left: ratio of TPXO depth to ROMS depth, near 1 in most places, with strong blue patches south of Stewart Island. Middle: M2 peak current from TPXO velocity, with bright spots above 2 m/s on the Stewart Island shelf. Right: M2 peak current from transport divided by ROMS h, with no spots above 1.4 m/s"></div>
+      <figcaption>Left: TPXO depth ÷ ROMS <code>h</code> (white = same depth, blue = TPXO shallower). Middle and right: M2 peak current (Cmax) on the ROMS grid, before the nodal correction. From the TPXO velocity, the largest M2 current is <strong>10.05 m/s</strong> and <strong>53 points</strong> are above 2 m/s, all on the shallow TPXO patches. From transport ÷ ROMS <code>h</code>, the largest is <strong>1.36 m/s</strong> (Cook Strait) and no point is above 2 m/s. Away from these patches the two panels are almost the same.</figcaption>
+    </figure>
+    <div class="callout"><span class="lbl">Note</span><span>"Currents = TPXO transport / ROMS h" is a proposed choice (see <code>docs/devlog.md</code>). The MATLAB version used the TPXO velocity as it is. On the open edges of the domain, TPXO depth / ROMS <code>h</code> is 0.69 to 2.04.</span></div>
+
+    <!-- STEP 3 -->
+    <div class="step-banner" id="step3"><div class="n">3</div><div><h2>Set the tide clock: nodal corrections and phase zero</h2><span class="lines">scripts/make_tides.py:55–64</span></div></div>
 <pre>names = [c.lower() for c in CONSTITUENTS]
 _, _, V = pyTMD.constituents.arguments(mjd(REF_DATE), names)
 nodal_u, f, _ = pyTMD.constituents.arguments(mjd(NODAL_DATE), names)
 correction = xr.DataArray(f[0] * np.exp(1j * (np.radians(V[0]) + nodal_u[0])), dims="con")
 z, u, v = z * correction, u * correction, v * correction</pre>
-      <p class="col">This is the step that most needs explaining, and the one that most often goes wrong in tide files. The whole step is one complex multiplication per constituent. To see why it is the right one, write down what TPXO means by its phase and what ROMS means by its phase, and make the two agree.</p>
+    <p>This is the step that most needs explaining, and the one that most often goes wrong in tide files. The whole step is one complex multiplication per constituent. To see why it is the right one, write down what TPXO means by its phase and what ROMS means by its phase, and make the two agree.</p>
 
-      <h3>3a. What a TPXO phase means</h3>
-      <p class="col">Tidal analysis (Doodson 1921, Schureman 1958) writes the tide-raising potential as a sum of cosines whose arguments are integer combinations of six slowly turning astronomical angles. For constituent \(k\) the argument is</p>
-      <div class="formula">
-        $$V_k(t)= i_1\tau + i_2 s + i_3 h + i_4 p + i_5 N' + i_6 p_s + \kappa\cdot 90°$$
-        <small>\(\tau\) = mean lunar time (\(15°\times\)UT hours \(-\,s+h\)), \(s\) = mean longitude of the Moon, \(h\) = of the Sun, \(p\) = of the lunar perigee, \(N'=-N\) = of the lunar node, \(p_s\) = of the solar perigee. All six are polynomials in time, in practice straight lines. \((i_1\ldots i_6)\) are the Doodson numbers of the constituent and \(\kappa\) is 0 or ±1.</small>
-      </div>
-      <p class="col">The equilibrium tide of constituent \(k\) is \(\propto\cos V_k(t)\). The real ocean lags behind it by a place-dependent angle \(G_k\), the <strong>Greenwich phase lag</strong>, and has amplitude \(A_k\). Because the Moon's orbit plane turns round once in 18.61 years (the node \(N\)), the lunar constituents also wax and wane slowly. That is written as a <strong>nodal factor</strong> \(f_k(t)\) on the amplitude and a <strong>nodal angle</strong> \(u_k(t)\) on the phase. So the sea level TPXO describes is</p>
-      <div class="formula">
-        $$\zeta(t)=\sum_k f_k(t)\,A_k\cos\!\big(V_k(t)+u_k(t)-G_k\big)\qquad\text{with}\qquad z_k=A_k e^{-iG_k}\ \text{ stored as }\ \texttt{hRe}+i\,\texttt{hIm}.$$
-      </div>
+    <h3 class="para">What a TPXO phase means</h3>
+    <p>Tidal analysis (Doodson 1921, Schureman 1958) writes the tide-raising potential as a sum of cosines whose arguments are integer combinations of six slowly turning astronomical angles. For constituent \(k\) the argument is</p>
+    <div class="eq">
+      $$V_k(t)= i_1\tau + i_2 s + i_3 h + i_4 p + i_5 N' + i_6 p_s + \kappa\cdot 90°$$
+      <small>\(\tau\) = mean lunar time (\(15°\times\)UT hours \(-\,s+h\)), \(s\) = mean longitude of the Moon, \(h\) = of the Sun, \(p\) = of the lunar perigee, \(N'=-N\) = of the lunar node, \(p_s\) = of the solar perigee. All six are polynomials in time, in practice straight lines. \((i_1\ldots i_6)\) are the Doodson numbers of the constituent and \(\kappa\) is 0 or ±1.</small>
+    </div>
+    <p>The equilibrium tide of constituent \(k\) is \(\propto\cos V_k(t)\). The real ocean lags behind it by a place-dependent angle \(G_k\), the <strong>Greenwich phase lag</strong>, and has amplitude \(A_k\). Because the Moon's orbit plane turns round once in 18.61 years (the node \(N\)), the lunar constituents also wax and wane slowly. That is written as a <strong>nodal factor</strong> \(f_k(t)\) on the amplitude and a <strong>nodal angle</strong> \(u_k(t)\) on the phase. So the sea level TPXO describes is</p>
+    <div class="eq">
+      $$\zeta(t)=\sum_k f_k(t)\,A_k\cos\!\big(V_k(t)+u_k(t)-G_k\big)\qquad\text{with}\qquad z_k=A_k e^{-iG_k}\ \text{ stored as }\ \texttt{hRe}+i\,\texttt{hIm}.$$
+    </div>
+    <div>
+      <div class="tcap">Doodson numbers and the angles the script uses</div>
       <div class="tbl">
         <table>
           <thead><tr><th>Constituent</th><th class="n">\(i_1\) (τ)</th><th class="n">\(i_2\) (s)</th><th class="n">\(i_3\) (h)</th><th class="n">\(i_4\) (p)</th><th class="n">\(i_6\) (p<sub>s</sub>)</th><th class="n">κ</th><th class="n">\(V_k\) at REF_DATE</th><th class="n">\(f_k\) at NODAL_DATE</th><th class="n">\(u_k\) at NODAL_DATE</th></tr></thead>
@@ -420,51 +417,48 @@ z, u, v = z * correction, u * correction, v * correction</pre>
           </tbody>
         </table>
       </div>
-      <p class="col muted" style="font-size:0.9rem">Doodson numbers from pyTMD 3.0.9 (<code>coefficients_table</code>); \(i_5\) is 0 for all 15. Values of \(V_k\), \(f_k\), \(u_k\) are what the script computes with <code>pyTMD.constituents.arguments</code>, OTIS convention. At REF_DATE 2026-01-01 00:00 UT the mean longitudes are \(s=67.98°\), \(h=280.67°\), \(p=61.30°\), \(N=342.17°\), \(p_s=282.80°\), so for M2, \(V=2\tau=2(h-s)=65.38°\). At NODAL_DATE 2026-02-15, \(N=339.79°\).</p>
+      <p class="muted" style="font-size:0.88rem;margin-top:6px">Doodson numbers from pyTMD 3.0.9 (<code>coefficients_table</code>); \(i_5\) is 0 for all 15. Values of \(V_k\), \(f_k\), \(u_k\) are what the script computes with <code>pyTMD.constituents.arguments</code>, OTIS convention. At REF_DATE 2026-01-01 00:00 UT the mean longitudes are \(s=67.98°\), \(h=280.67°\), \(p=61.30°\), \(N=342.17°\), \(p_s=282.80°\), so for M2, \(V=2\tau=2(h-s)=65.38°\). At NODAL_DATE 2026-02-15, \(N=339.79°\).</p>
+    </div>
 
-      <h3>3b. What a ROMS phase means</h3>
-      <p class="col">ROMS has none of this astronomy. It has one clock, \(t\) = time since the phase-zero date \(t_0\), and the sum at the top of the page: \(\zeta(t)=\sum_k E_k\cos(\omega_k t-\varphi_k)\). The job of step 3 is to find \(E_k\) and \(\varphi_k\) so that this sum is the same function of time as the TPXO sum in 3a, for the length of the run.</p>
-      <p class="col">The key fact is that \(V_k(t)\) is a straight line in time. Its slope is the angular frequency of the constituent, because \(\omega_k=i_1\dot\tau+i_2\dot s+\ldots\) (this is how pyTMD's <code>frequency</code> works out <code>tide_period</code>). So</p>
-      <div class="formula">
-        $$V_k(t)=V_k(t_0)+\omega_k\,(t-t_0).$$
-      </div>
-      <p class="col">Put this into the TPXO sum and hold \(f_k\), \(u_k\) fixed at one date \(t_n\) (they change by a fraction of a percent over months, see 3d):</p>
-      <div class="formula">
-        $$\zeta(t)=\sum_k \underbrace{f_k(t_n)A_k}_{E_k}\cos\!\Big(\omega_k(t-t_0)-\underbrace{\big[G_k-V_k(t_0)-u_k(t_n)\big]}_{\varphi_k}\Big).$$
-      </div>
-      <p class="col">That is the ROMS form, so</p>
-      <div class="formula">
-        $$E_k=f_k(t_n)\,A_k,\qquad \varphi_k=G_k-V_k(t_0)-u_k(t_n),\qquad t_0=\texttt{REF\_DATE},\ \ t_n=\texttt{NODAL\_DATE}.$$
-      </div>
+    <h3 class="para">What a ROMS phase means</h3>
+    <p>ROMS has none of this astronomy. It has one clock, \(t\) = time since the phase-zero date \(t_0\), and the sum of paragraph 1-1: \(\zeta(t)=\sum_k E_k\cos(\omega_k t-\varphi_k)\). The job of step 3 is to find \(E_k\) and \(\varphi_k\) so that this sum is the same function of time as the TPXO sum in paragraph 2-6, for the length of the run.</p>
+    <p>The key fact is that \(V_k(t)\) is a straight line in time. Its slope is the angular frequency of the constituent, because \(\omega_k=i_1\dot\tau+i_2\dot s+\ldots\) (this is how pyTMD's <code>frequency</code> works out <code>tide_period</code>). So</p>
+    <div class="eq">$$V_k(t)=V_k(t_0)+\omega_k\,(t-t_0).$$</div>
+    <p>Put this into the TPXO sum and hold \(f_k\), \(u_k\) fixed at one date \(t_n\) (they change by a fraction of a percent over months, paragraph 2-9):</p>
+    <div class="eq">$$\zeta(t)=\sum_k \underbrace{f_k(t_n)A_k}_{E_k}\cos\!\Big(\omega_k(t-t_0)-\underbrace{\big[G_k-V_k(t_0)-u_k(t_n)\big]}_{\varphi_k}\Big).$$</div>
+    <p>That is the ROMS form, so</p>
+    <div class="eq">$$E_k=f_k(t_n)\,A_k,\qquad \varphi_k=G_k-V_k(t_0)-u_k(t_n),\qquad t_0=\texttt{REF\_DATE},\ \ t_n=\texttt{NODAL\_DATE}.$$</div>
 
-      <h3>3c. The same thing in one complex multiplication</h3>
-      <p class="col">Both rules are applied at once by multiplying the TPXO complex number by \(f_k e^{\,i(V_k(t_0)+u_k(t_n))}\). This is line 63 of the script:</p>
-      <div class="formula">
-        $$z_k\cdot f_k\,e^{\,i\,(V_k+u_k)} \;=\; A_k e^{-iG_k}\cdot f_k\,e^{\,i\,(V_k+u_k)} \;=\; \underbrace{f_kA_k}_{E_k}\;e^{-i\,\overbrace{(G_k-V_k-u_k)}^{\varphi_k}}$$
-        <small>Multiplying by a complex number of size \(f\) and angle \(V+u\) scales the amplitude by \(f\) and turns the phase lag by \(-(V+u)\). The same factor is applied to \(u_k\) and \(v_k\), because all three belong to the same constituent and must keep one clock.</small>
+    <h3 class="para">The same thing in one complex multiplication</h3>
+    <p>Both rules are applied at once by multiplying the TPXO complex number by \(f_k e^{\,i(V_k(t_0)+u_k(t_n))}\). This is line 63 of the script:</p>
+    <div class="eq">
+      $$z_k\cdot f_k\,e^{\,i\,(V_k+u_k)} \;=\; A_k e^{-iG_k}\cdot f_k\,e^{\,i\,(V_k+u_k)} \;=\; \underbrace{f_kA_k}_{E_k}\;e^{-i\,\overbrace{(G_k-V_k-u_k)}^{\varphi_k}}$$
+      <small>Multiplying by a complex number of size \(f\) and angle \(V+u\) scales the amplitude by \(f\) and turns the phase lag by \(-(V+u)\). The same factor is applied to \(u_k\) and \(v_k\), because all three belong to the same constituent and must keep one clock.</small>
+    </div>
+    <div class="proc">
+      <div class="blk why"><span class="lbl">Why V at REF_DATE</span>
+        <p>\(V_k\) is the fast angle. For M2 it goes round 360° every 12.42 h. ROMS adds that motion itself through \(\omega_k t\), so the script must supply \(V_k\) at exactly one instant: the moment ROMS calls \(t=0\). That instant is written into the file as <code>zero_phase_date</code> and ROMS reads it back (chapter 4).</p>
       </div>
-      <div class="ww">
-        <div class="why"><span class="tag">Why V at REF_DATE</span>
-          <p>\(V_k\) is the fast angle. For M2 it goes round 360° every 12.42 h. ROMS adds that motion itself through \(\omega_k t\), so the script must supply \(V_k\) at exactly one instant: the moment ROMS calls \(t=0\). That instant is written into the file as <code>zero_phase_date</code> and ROMS reads it back (see <a href="#rom">how ROMS uses the file</a>). If the two did not agree, every phase would be off by \(\omega_k\times\)(the gap): for M2, 1 hour is 29°.</p>
-        </div>
-        <div class="why"><span class="tag">Why f and u at NODAL_DATE</span>
-          <p>\(f_k\) and \(u_k\) are the slow angles. They depend only on \(N\) (and \(p\)), which turn round in 18.6 and 8.85 years. ROMS cannot update them during a run, so the script freezes them at the middle of the run, where the error at the start and at the end is smallest and equal.</p>
-        </div>
+      <div class="blk why"><span class="lbl">Why f and u at NODAL_DATE</span>
+        <p>\(f_k\) and \(u_k\) are the slow angles. They depend only on \(N\) (and \(p\)), which turn round in 18.6 and 8.85 years. ROMS cannot update them during a run, so the script freezes them at the middle of the run, where the error at the start and at the end is smallest and equal.</p>
       </div>
+    </div>
+    <div class="callout warning"><span class="lbl">Warning</span><span>If the phase-zero date in the file and the instant ROMS calls \(t=0\) differ by a time \(\Delta t\), every constituent is shifted by \(\omega_k\Delta t\). For M2 one hour is 29°. Chapter 4 shows how ROMS reads the date from the file so that this cannot happen by accident.</span></div>
 
-      <h3>3d. Where f and u come from</h3>
-      <p class="col">pyTMD uses the Schureman formulas that OTIS uses, so our file matches what the OSU tools would make. For each constituent they are short trigonometric sums in the node angle \(N\). The two that matter most in Moana:</p>
-      <div class="formula">
-        $$\textbf{M2, N2, 2N2, MS4:}\qquad f=\sqrt{a^2+b^2},\quad u=\operatorname{atan2}(a,b),\qquad
-        a=-0.03731\sin N+0.00052\sin 2N,\quad b=1-0.03731\cos N+0.00052\cos 2N$$
-        $$\textbf{K1:}\qquad a=-0.1554\sin N+0.0029\sin 2N,\quad b=1+0.1158\cos N-0.0029\cos 2N$$
-        <small>So \(f_{M2}\approx 1-0.037\cos N\) and \(u_{M2}\approx-2.1°\sin N\). O1 and K2 have the same shape with larger coefficients (0.189 and 0.311), M4 and MN4 are products (\(f_{M4}=f_{M2}^2\), \(u_{M4}=2u_{M2}\)), and the solar constituents S2, P1, S1 have \(f=1\), \(u=0\). The full set is in <code>pyTMD.constituents.nodal_modulation</code>.</small>
-      </div>
-      <figure>
-        <div class="plot"><img src="figures/nodal.png" alt="Line chart from 2010 to 2035 of the nodal amplitude factor f and phase shift u for M2, K1, O1 and K2. In 2026 K2 is near its maximum f of 1.3, O1 near 1.18, K1 near 1.11, M2 near its minimum of 0.965"></div>
-        <figcaption>Nodal factors from pyTMD. The grey band is the model run (2026-01-01 to 2026-04-01) and the dashed line is <code>NODAL_DATE</code>. 2026 is close to a peak of the cycle: at <code>NODAL_DATE</code>, \(f\) is 0.965 for M2, 1.108 for K1, 1.175 for O1 and 1.299 for K2. So in 2026 the K2 tide is 30% bigger than its long-term mean, and M2 is 3.5% smaller. Over 3 months the lines are almost flat, which is why one date is enough.</figcaption>
-      </figure>
-      <p class="col">How much \(f\) and \(u\) drift across the Moana run, and across a full year, from the same pyTMD calls:</p>
+    <h3 class="para">Where f and u come from</h3>
+    <p>pyTMD uses the Schureman formulas that OTIS uses, so our file matches what the OSU tools would make. For each constituent they are short trigonometric sums in the node angle \(N\). The two that matter most in Moana:</p>
+    <div class="eq">
+      $$\textbf{M2, N2, 2N2, MS4:}\qquad f=\sqrt{a^2+b^2},\quad u=\operatorname{atan2}(a,b),\qquad
+      a=-0.03731\sin N+0.00052\sin 2N,\quad b=1-0.03731\cos N+0.00052\cos 2N$$
+      $$\textbf{K1:}\qquad a=-0.1554\sin N+0.0029\sin 2N,\quad b=1+0.1158\cos N-0.0029\cos 2N$$
+      <small>So \(f_{M2}\approx 1-0.037\cos N\) and \(u_{M2}\approx-2.1°\sin N\). O1 and K2 have the same shape with larger coefficients (0.189 and 0.311), M4 and MN4 are products (\(f_{M4}=f_{M2}^2\), \(u_{M4}=2u_{M2}\)), and the solar constituents S2, P1, S1 have \(f=1\), \(u=0\). The full set is in <code>pyTMD.constituents.nodal_modulation</code>.</small>
+    </div>
+    <figure>
+      <div class="plot"><img src="figures/nodal.png" alt="Line chart from 2010 to 2035 of the nodal amplitude factor f and phase shift u for M2, K1, O1 and K2. In 2026 K2 is near its maximum f of 1.3, O1 near 1.18, K1 near 1.11, M2 near its minimum of 0.965"></div>
+      <figcaption>Nodal factors from pyTMD. The grey band is the model run (2026-01-01 to 2026-04-01) and the dashed line is <code>NODAL_DATE</code>. 2026 is close to a peak of the cycle: at <code>NODAL_DATE</code>, \(f\) is 0.965 for M2, 1.108 for K1, 1.175 for O1 and 1.299 for K2. So in 2026 the K2 tide is 30% bigger than its long-term mean, and M2 is 3.5% smaller. Over 3 months the lines are almost flat, which is why one date is enough.</figcaption>
+    </figure>
+    <div>
+      <div class="tcap">Drift of f and u across the run and across one year</div>
       <div class="tbl">
         <table>
           <thead><tr><th></th><th class="n">2026-01-01 (run start)</th><th class="n">2026-02-15 (NODAL_DATE)</th><th class="n">2026-04-01 (run end)</th><th class="n">2027-02-15 (one year on)</th></tr></thead>
@@ -476,94 +470,91 @@ z, u, v = z * correction, u * correction, v * correction</pre>
           </tbody>
         </table>
       </div>
-      <p class="col">Across the 3-month run no \(f\) moves by more than 0.7% and no \(u\) by more than 1.3°. At the largest M2 tide in the domain (1.24 m) the frozen values are worth about 2 mm of sea level at the ends of the run; for K2 (0.14 m) also about 2 mm. This agrees with the pyTMD test in <a href="#result">the checks</a>, where a 30-day sum with frozen \(f\), \(u\) differs from a sum with time-varying \(f\), \(u\) by 1 to 3 mm. After a year the K2 phase has moved 5° and its amplitude 4%, so the file should be made again for each new year of simulation (or each new run period), with <code>NODAL_DATE</code> in the middle of it. Ideally ROMS would update \(f\) and \(u\) itself at run time; that is not implemented, so the yearly file is the usual practice.</p>
-
-      <h3>3e. Worked example: M2 at Taranaki Bight</h3>
-      <p class="col">The ROMS point nearest 173.4°E, 39.6°S is (173.42°E, 39.61°S), depth 110 m. Reading the TPXO numbers interpolated to that point, and the pyTMD angles from the table above:</p>
-      <div class="formula">
-        $$z=\texttt{hRe}+i\,\texttt{hIm}=0.4789+1.0742\,i\quad\Rightarrow\quad A=|z|=1.1762\ \text{m},\qquad G=-\arg z=294.03°$$
-        $$E=f\,A=0.9655\times1.1762=1.1355\ \text{m},\qquad \varphi=G-V-u=294.03°-65.38°-0.75°=227.90°$$
-        <small>The file has <code>tide_Eamp</code> = 1.1355 m and <code>tide_Ephase</code> = 227.90° at this point. So on 2026-01-01 00:00 UT the M2 wave at Taranaki is at \(\cos(-227.90°)=-0.67\) of its amplitude, 0.76 m below mean, and its next high water comes \(227.90°/360°\times12.42\ \text{h}=7.86\) h later, at 07:52 UT.</small>
-      </div>
     </div>
-  </article>
+    <p>Across the 3-month run no \(f\) moves by more than 0.7% and no \(u\) by more than 1.3°. At the largest M2 tide in the domain (1.24 m) the frozen values are worth about 2 mm of sea level at the ends of the run; for K2 (0.14 m) also about 2 mm. This agrees with the pyTMD test in chapter 3, where a 30-day sum with frozen \(f\), \(u\) differs from a sum with time-varying \(f\), \(u\) by 1 to 3 mm.</p>
+    <div class="callout caution"><span class="lbl">Caution</span><span>After a year the K2 phase has moved 5° and its amplitude 4%. Make the file again for each new year of simulation (or each new run period), with <code>NODAL_DATE</code> in the middle of it. Ideally ROMS would update \(f\) and \(u\) itself at run time; that is not implemented, so the yearly file is the usual practice.</span></div>
 
-  <article class="step" id="step4">
-    <div class="num">4</div>
-    <div class="stack">
-      <h2>Turn u and v into current ellipses</h2>
-      <span class="lines">scripts/make_tides.py:66–67</span>
+    <h3 class="para">Worked example: M2 at Taranaki Bight</h3>
+    <p>The ROMS point nearest 173.4°E, 39.6°S is (173.42°E, 39.61°S), depth 110 m. Reading the TPXO numbers interpolated to that point, and the pyTMD angles from the table above:</p>
+    <div class="eq">
+      $$z=\texttt{hRe}+i\,\texttt{hIm}=0.4789+1.0742\,i\quad\Rightarrow\quad A=|z|=1.1762\ \text{m},\qquad G=-\arg z=294.03°$$
+      $$E=f\,A=0.9655\times1.1762=1.1355\ \text{m},\qquad \varphi=G-V-u=294.03°-65.38°-0.75°=227.90°$$
+      <small>The file has <code>tide_Eamp</code> = 1.1355 m and <code>tide_Ephase</code> = 227.90° at this point. So on 2026-01-01 00:00 UT the M2 wave at Taranaki is at \(\cos(-227.90°)=-0.67\) of its amplitude, 0.76 m below mean, and its next high water comes \(227.90°/360°\times12.42\ \text{h}=7.86\) h later, at 07:52 UT.</small>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-banner" id="step4"><div class="n">4</div><div><h2>Turn u and v into current ellipses</h2><span class="lines">scripts/make_tides.py:66–67</span></div></div>
 <pre>Cmax, Cmin, Cangle, Cphase = pyTMD.ellipse.ellipse(u.values, v.values)</pre>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <p>For each constituent and each point, pyTMD converts the complex east (\(u\)) and north (\(v\)) currents into the 4 numbers that describe a tidal ellipse.</p>
-          <ul>
-            <li><code>Cmax</code>: the fastest current in one cycle (semi-major axis) [m/s]</li>
-            <li><code>Cmin</code>: the slowest current, at right angles to Cmax (semi-minor axis). Its sign gives the direction of rotation: positive turns anticlockwise.</li>
-            <li><code>Cangle</code>: the direction of Cmax, degrees anticlockwise from east, 0 to 180</li>
-            <li><code>Cphase</code>: when the current lies along Cmax, as a phase angle on the same clock as Ephase</li>
-          </ul>
-        </div>
-        <div class="why"><span class="tag">Why ROMS wants ellipses</span>
-          <p>The complex pair \(u_k, v_k\) is 4 real numbers (two amplitudes, two phases), and so is the ellipse. They hold the same information, and the <a href="#appendix">appendix</a> gives the exact conversion both ways. ROMS wants the ellipse form for three reasons.</p>
-          <ul>
-            <li><strong>Rotation is one subtraction.</strong> ROMS grids are curvilinear and turned away from east-north by the grid angle <code>angler</code>. Cmax, Cmin and Cphase do not change when the axes turn; only Cangle does. So ROMS rotates the whole current with <code>angle = Cangle − angler</code> (<a href="#rom">below</a>). With \(u,v\) amplitudes and phases it would have to re-mix two complex numbers at every point.</li>
-            <li><strong>The numbers mean something.</strong> Cmax is the peak speed, the sign of Cmin the sense of turning, Cangle the main axis. They can be checked on a map at a glance (figures below). A \(v\)-phase cannot.</li>
-            <li><strong>It is the convention.</strong> The OSU/OTPS tools and the Rutgers MATLAB scripts write this form, so ROMS can read any of these files without a flag.</li>
-          </ul>
+    <h3 class="para">The four ellipse numbers</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <p>For each constituent and each point, pyTMD converts the complex east (\(u\)) and north (\(v\)) currents into the 4 numbers that describe a tidal ellipse (Foreman's formulas, appendix A).</p>
+        <ul class="plain">
+          <li><code>Cmax</code>: the fastest current in one cycle (semi-major axis) [m/s]</li>
+          <li><code>Cmin</code>: the slowest current, at right angles to Cmax (semi-minor axis). Its sign gives the direction of rotation: positive turns anticlockwise.</li>
+          <li><code>Cangle</code>: the direction of Cmax, degrees anticlockwise from east, 0 to 180</li>
+          <li><code>Cphase</code>: when the current lies along Cmax, as a phase angle on the same clock as Ephase</li>
+        </ul>
+        <p>The ellipse is the path drawn by the tip of the current vector over one period. In the direction of Cangle the vector reaches ±Cmax; a quarter period later it reaches ±Cmin at right angles. With \(\theta\) = Cangle and \(\psi\) = Cphase, the current at time \(t\) is</p>
+        <div class="eq">
+          $$u(t)+i\,v(t)=e^{\,i\theta}\Big[\,C_{\max}\cos(\omega t-\psi)+i\,C_{\min}\sin(\omega t-\psi)\Big]$$
+          <small>At \(\omega t=\psi\) the bracket is \(C_{\max}\) and the current points along \(\theta\). A quarter period later it is \(i\,C_{\min}\): a vector of length \(|C_{\min}|\) turned 90° anticlockwise from \(\theta\) if \(C_{\min}>0\), clockwise if \(C_{\min}<0\). This is also the formula ROMS uses to rebuild the current (chapter 4).</small>
         </div>
       </div>
-      <p class="col">The ellipse is the path drawn by the tip of the current vector over one period. In the direction of Cangle the vector reaches ±Cmax; a quarter period later it reaches ±Cmin at right angles. The formula ROMS uses to rebuild the current from the four numbers (see <a href="#rom">how ROMS uses the file</a>) is, with \(\theta\) = Cangle and \(\psi\) = Cphase:</p>
-      <div class="formula">
-        $$u(t)+i\,v(t)=e^{\,i\theta}\Big[\,C_{\max}\cos(\omega t-\psi)+i\,C_{\min}\sin(\omega t-\psi)\Big]$$
-        <small>At \(\omega t=\psi\) the bracket is \(C_{\max}\) and the current points along \(\theta\). A quarter period later it is \(i\,C_{\min}\): a vector of length \(|C_{\min}|\) turned 90° anticlockwise from \(\theta\) if \(C_{\min}>0\), clockwise if \(C_{\min}<0\).</small>
+      <div class="blk why"><span class="lbl">Why ROMS wants ellipses</span>
+        <p>The complex pair \(u_k, v_k\) is 4 real numbers (two amplitudes, two phases), and so is the ellipse. They hold the same information, and appendix A gives the exact conversion both ways. ROMS wants the ellipse form for three reasons.</p>
+        <ul class="plain">
+          <li><strong>Rotation is one subtraction.</strong> ROMS grids are curvilinear and turned away from east-north by the grid angle <code>angler</code>. Cmax, Cmin and Cphase do not change when the axes turn; only Cangle does. So ROMS rotates the whole current with <code>angle = Cangle − angler</code> (chapter 4). With \(u,v\) amplitudes and phases it would have to re-mix two complex numbers at every point.</li>
+          <li><strong>The numbers mean something.</strong> Cmax is the peak speed, the sign of Cmin the sense of turning, Cangle the main axis. They can be checked on a map at a glance (figures below). A \(v\)-phase cannot.</li>
+          <li><strong>It is the convention.</strong> The OSU/OTPS tools and the Rutgers MATLAB scripts write this form, so ROMS can read any of these files without a flag.</li>
+        </ul>
       </div>
-      <figure>
-        <div class="canvas"><svg viewBox="0 0 520 220" width="100%" style="min-width:360px" role="img" aria-label="A tidal current ellipse showing Cmax, Cmin and Cangle">
-          <g transform="translate(200,110)">
-            <line x1="-170" y1="0" x2="170" y2="0" style="stroke:var(--rule)"/>
-            <line x1="0" y1="-100" x2="0" y2="100" style="stroke:var(--rule)"/>
-            <text x="172" y="4" style="fill:var(--muted);font-size:11px">east</text>
-            <text x="4" y="-92" style="fill:var(--muted);font-size:11px">north</text>
-            <g transform="rotate(-28)">
-              <ellipse rx="140" ry="50" style="fill:var(--sea-soft);stroke:var(--sea);stroke-width:1.6"/>
-              <line x1="0" y1="0" x2="140" y2="0" style="stroke:var(--mark);stroke-width:2"/>
-              <line x1="0" y1="0" x2="0" y2="-50" style="stroke:var(--sea);stroke-width:2"/>
-              <path d="M 96 -36 A 140 50 0 0 0 40 -48" style="fill:none;stroke:var(--ink);stroke-width:1.3" marker-end="url(#ar)"/>
-            </g>
-            <path d="M 60 0 A 60 60 0 0 0 52.98 -28.17" style="fill:none;stroke:var(--mark)"/>
-            <text x="66" y="-8" style="fill:var(--mark);font-size:12px">Cangle</text>
-            <text x="96" y="-70" style="fill:var(--mark);font-size:12.5px;font-weight:600">Cmax</text>
-            <text x="-52" y="-46" style="fill:var(--sea);font-size:12.5px;font-weight:600">Cmin</text>
-          </g>
-          <text x="380" y="80" style="fill:var(--muted);font-size:11.5px">The current vector</text>
-          <text x="380" y="96" style="fill:var(--muted);font-size:11.5px">goes once round the</text>
-          <text x="380" y="112" style="fill:var(--muted);font-size:11.5px">ellipse each period.</text>
-          <text x="380" y="134" style="fill:var(--muted);font-size:11.5px">Cphase says where it</text>
-          <text x="380" y="150" style="fill:var(--muted);font-size:11.5px">is at t = 0.</text>
-        </svg></div>
-        <figcaption>One constituent's current at one point. Cphase is the time, as an angle, at which the vector lies along Cmax. The next figure draws it in real numbers.</figcaption>
-      </figure>
-      <figure>
-        <div class="plot wide"><img src="figures/point_current.png" alt="Two rows, one for Taranaki Bight and one for Cook Strait. Left: the M2 ellipse traced by the current vector with a dot every hour, a magenta arrow at t equals 0 and a blue arrow at t equals Cphase over omega. Middle: east and north current and speed over 25 hours. Right: current direction over 25 hours, which sweeps smoothly round at Taranaki but jumps between two values at Cook Strait"></div>
-        <figcaption>The M2 current at two ROMS points, rebuilt from the file with the ROMS formula. <strong>Left:</strong> the ellipse, one dot per hour from \(t=0\) (2026-01-01 00:00 UT). The magenta arrow is the current at \(t=0\); the blue arrow is the current at \(t=\psi/\omega\), when it lies along Cmax (dashed line). Both ellipses turn anticlockwise (Cmin &gt; 0). <strong>Middle:</strong> \(u\), \(v\) and speed. The speed peaks twice per period, at \(\psi/\omega\) and half a period later. <strong>Right:</strong> the direction of the current. At Taranaki Bight the ellipse is fat (Cmin/Cmax = 0.27) and the direction sweeps smoothly through all 360° in 12.42 h. In Cook Strait the ellipse is a needle (Cmin/Cmax = 0.05): the current sits at Cangle, drops to near zero at slack water, and flips to Cangle + 180° in a few minutes. That is "back and forth along the strait".</figcaption>
-      </figure>
-      <figure>
-        <div class="plot"><img src="figures/ellipses.png" alt="Map of M2 current ellipses over the Moana domain and a zoom on Cook Strait. Large ellipses over the Stewart Island shelf and in Cook Strait. In Cook Strait the ellipses are long and thin, aligned with the strait"></div>
-        <figcaption>M2 ellipses from the finished file, drawn on top of M2 Cmax (grey). Left: every 14th point. Right: Cook Strait, every 3rd point, with a larger scale. Blue ellipses turn anticlockwise, orange ones clockwise. In Cook Strait the ellipses are long and thin: the current flows back and forth along the strait. Over the deep ocean they are small and rounder.</figcaption>
-      </figure>
-      <figure>
-        <div class="plot wide"><img src="figures/cphase.png" alt="Three maps of M2. Left: elevation phase with co-phase lines turning round New Zealand. Middle: current phase Cphase with short lines showing Cangle; the open ocean west of New Zealand is near 180 to 270 degrees, the east is near 90. Right: the angle between Cphase and Ephase, near zero over the open ocean and near 90 along the coasts and in Cook Strait"></div>
-        <figcaption>The M2 phases, which the ellipse map above cannot show. <strong>Left:</strong> Ephase, when high water comes. <strong>Middle:</strong> Cphase, when the fastest current comes, with the Cangle axis drawn every 14th point. Grey = Cmax below 2 cm/s, where the phase means little. Over the open ocean, Cphase follows Ephase and the axes point across the co-phase lines: the M2 wave is a progressive wave travelling round New Zealand, and its current is strongest at high and at low water. <strong>Right:</strong> the angle between the two phases, folded to 0–90° (Cangle is only defined to 180°, so a difference of 180° is the same as 0°). Near 0 the current is strongest at high or low water (progressive wave). Near 90 the current is strongest at mid tide and slack at high and low water (standing wave). Standing behaviour appears along the coasts and in Cook Strait, where the strait current is driven by the sea-level difference between its two ends.</figcaption>
-      </figure>
     </div>
-  </article>
+    <figure>
+      <div class="canvas"><svg viewBox="0 0 520 220" width="100%" style="min-width:360px" role="img" aria-label="A tidal current ellipse showing Cmax, Cmin and Cangle">
+        <g transform="translate(200,110)">
+          <line x1="-170" y1="0" x2="170" y2="0" style="stroke:var(--hair)"/>
+          <line x1="0" y1="-100" x2="0" y2="100" style="stroke:var(--hair)"/>
+          <text x="172" y="4" style="fill:var(--muted);font-size:11px">east</text>
+          <text x="4" y="-92" style="fill:var(--muted);font-size:11px">north</text>
+          <g transform="rotate(-28)">
+            <ellipse rx="140" ry="50" style="fill:var(--panel);stroke:var(--ink);stroke-width:1.6"/>
+            <line x1="0" y1="0" x2="140" y2="0" style="stroke:var(--accent);stroke-width:2"/>
+            <line x1="0" y1="0" x2="0" y2="-50" style="stroke:var(--link);stroke-width:2"/>
+            <path d="M 96 -36 A 140 50 0 0 0 40 -48" style="fill:none;stroke:var(--ink);stroke-width:1.3" marker-end="url(#ar)"/>
+          </g>
+          <path d="M 60 0 A 60 60 0 0 0 52.98 -28.17" style="fill:none;stroke:var(--accent)"/>
+          <text x="66" y="-8" style="fill:var(--accent);font-size:12px">Cangle</text>
+          <text x="96" y="-70" style="fill:var(--accent);font-size:12.5px;font-weight:600">Cmax</text>
+          <text x="-52" y="-46" style="fill:var(--link);font-size:12.5px;font-weight:600">Cmin</text>
+        </g>
+        <text x="380" y="80" style="fill:var(--muted);font-size:11.5px">The current vector</text>
+        <text x="380" y="96" style="fill:var(--muted);font-size:11.5px">goes once round the</text>
+        <text x="380" y="112" style="fill:var(--muted);font-size:11.5px">ellipse each period.</text>
+        <text x="380" y="134" style="fill:var(--muted);font-size:11.5px">Cphase says where it</text>
+        <text x="380" y="150" style="fill:var(--muted);font-size:11.5px">is at t = 0.</text>
+      </svg></div>
+      <figcaption>One constituent's current at one point. Cphase is the time, as an angle, at which the vector lies along Cmax. The next figure draws it in real numbers.</figcaption>
+    </figure>
 
-  <article class="step" id="step5">
-    <div class="num">5</div>
-    <div class="stack">
-      <h2>Set land to zero and write the ROMS file</h2>
-      <span class="lines">scripts/make_tides.py:69–100</span>
+    <h3 class="para">The ellipse in real numbers: two points</h3>
+    <figure>
+      <div class="plot wide"><img src="figures/point_current.png" alt="Two rows, one for Taranaki Bight and one for Cook Strait. Left: the M2 ellipse traced by the current vector with a dot every hour, a magenta arrow at t equals 0 and a blue arrow at t equals Cphase over omega. Middle: east and north current and speed over 25 hours. Right: current direction over 25 hours, which sweeps smoothly round at Taranaki but jumps between two values at Cook Strait"></div>
+      <figcaption>The M2 current at two ROMS points, rebuilt from the file with the ROMS formula. <strong>Left:</strong> the ellipse, one dot per hour from \(t=0\) (2026-01-01 00:00 UT). The magenta arrow is the current at \(t=0\); the blue arrow is the current at \(t=\psi/\omega\), when it lies along Cmax (dashed line). Both ellipses turn anticlockwise (Cmin &gt; 0). <strong>Middle:</strong> \(u\), \(v\) and speed. The speed peaks twice per period, at \(\psi/\omega\) and half a period later. <strong>Right:</strong> the direction of the current. At Taranaki Bight the ellipse is fat (Cmin/Cmax = 0.27) and the direction sweeps smoothly through all 360° in 12.42 h. In Cook Strait the ellipse is a needle (Cmin/Cmax = 0.05): the current sits at Cangle, drops to near zero at slack water, and flips to Cangle + 180° in a few minutes. That is "back and forth along the strait".</figcaption>
+    </figure>
+
+    <h3 class="para">Ellipses and phases on the map</h3>
+    <figure>
+      <div class="plot"><img src="figures/ellipses.png" alt="Map of M2 current ellipses over the Moana domain and a zoom on Cook Strait. Large ellipses over the Stewart Island shelf and in Cook Strait. In Cook Strait the ellipses are long and thin, aligned with the strait"></div>
+      <figcaption>M2 ellipses from the finished file, drawn on top of M2 Cmax (grey). Left: every 14th point. Right: Cook Strait, every 3rd point, with a larger scale. Blue ellipses turn anticlockwise, orange ones clockwise. In Cook Strait the ellipses are long and thin: the current flows back and forth along the strait. Over the deep ocean they are small and rounder.</figcaption>
+    </figure>
+    <figure>
+      <div class="plot wide"><img src="figures/cphase.png" alt="Three maps of M2. Left: elevation phase with co-phase lines turning round New Zealand. Middle: current phase Cphase with short lines showing Cangle; the open ocean west of New Zealand is near 180 to 270 degrees, the east is near 90. Right: the angle between Cphase and Ephase, near zero over the open ocean and near 90 along the coasts and in Cook Strait"></div>
+      <figcaption>The M2 phases, which the ellipse map cannot show. <strong>Left:</strong> Ephase, when high water comes. <strong>Middle:</strong> Cphase, when the fastest current comes, with the Cangle axis drawn every 14th point. Grey = Cmax below 2 cm/s, where the phase means little. Over the open ocean, Cphase follows Ephase and the axes point across the co-phase lines: the M2 wave is a progressive wave travelling round New Zealand, and its current is strongest at high and at low water. <strong>Right:</strong> the angle between the two phases, folded to 0–90° (Cangle is only defined to 180°, so a difference of 180° is the same as 0°). Near 0 the current is strongest at high or low water (progressive wave). Near 90 the current is strongest at mid tide and slack at high and low water (standing wave). Standing behaviour appears along the coasts and in Cook Strait, where the strait current is driven by the sea-level difference between its two ends.</figcaption>
+    </figure>
+
+    <!-- STEP 5 -->
+    <div class="step-banner" id="step5"><div class="n">5</div><div><h2>Set land to zero and write the ROMS file</h2><span class="lines">scripts/make_tides.py:69–100</span></div></div>
 <pre>def field(values, long_name, units):
     return xr.DataArray(np.where(water, values, 0.0), dims=dims, attrs={...})
 
@@ -571,29 +562,31 @@ z, u, v = z * correction, u * correction, v * correction</pre>
 "tide_Ephase": field(np.degrees(-np.angle(z.values)) % 360, ...)
 ...
 out.to_netcdf(OUT, encoding={"tidal_constituents": {"dtype": "S1"}})</pre>
-      <div class="ww">
-        <div class="what"><span class="tag">What</span>
-          <ul>
-            <li>Sea-level amplitude \(E=|z|\), phase \(\varphi=-\arg z\) in degrees, 0 to 360. This is where the complex numbers end.</li>
-            <li>Every field is set to 0 on ROMS land.</li>
-            <li><code>tide_period</code> in hours, \(T_k=2\pi/\omega_k/3600\), from pyTMD's frequency of each constituent.</li>
-            <li><code>zero_phase_date</code> = REF_DATE written as 20260101.</li>
-            <li>Constituent names are written as character arrays.</li>
-            <li><code>lon_rho</code>, <code>lat_rho</code>, <code>mask_rho</code> and a history note are added.</li>
-          </ul>
-        </div>
-        <div class="why"><span class="tag">Why</span>
-          <p>ROMS does not use tide values on land, but a NaN in an input file can still break the run, so land gets 0. The names, units and layout match the ROMS tide file convention and the MATLAB output, so ROMS reads the file without changes. The <code>S1</code> character type is the netCDF form that Fortran reads for strings. The grid variables and the history note let anyone plot or trace the file later. <code>zero_phase_date</code> is read by ROMS and sets its tide clock (next sections).</p>
-        </div>
+    <h3 class="para">Fields, units and metadata</h3>
+    <div class="proc">
+      <div class="blk"><span class="lbl">What the code does</span>
+        <ul class="plain">
+          <li>Sea-level amplitude \(E=|z|\), phase \(\varphi=-\arg z\) in degrees, 0 to 360. This is where the complex numbers end.</li>
+          <li>Every field is set to 0 on ROMS land.</li>
+          <li><code>tide_period</code> in hours, \(T_k=2\pi/\omega_k/3600\), from pyTMD's frequency of each constituent.</li>
+          <li><code>zero_phase_date</code> = REF_DATE written as 20260101.</li>
+          <li>Constituent names are written as character arrays.</li>
+          <li><code>lon_rho</code>, <code>lat_rho</code>, <code>mask_rho</code> and a history note are added.</li>
+        </ul>
+      </div>
+      <div class="blk why"><span class="lbl">Why</span>
+        <p>ROMS does not use tide values on land, but a NaN in an input file can still break the run, so land gets 0. The names, units and layout match the ROMS tide file convention and the MATLAB output, so ROMS reads the file without changes. The <code>S1</code> character type is the netCDF form that Fortran reads for strings. The grid variables and the history note let anyone plot or trace the file later. <code>zero_phase_date</code> is read by ROMS and sets its tide clock (chapter 4).</p>
       </div>
     </div>
-  </article>
+  </div>
 </section>
 
-<section id="result">
+<!-- ============================ CHAPTER 3 ============================ -->
+<section class="chapter" id="ch3" style="--chn:'3'">
   <div class="stack">
-    <span class="eyebrow">Result</span>
-    <h2>What the file looks like</h2>
+    <div class="chapter-head"><span class="chapter-label">Chapter 3</span><h2>Result and checks</h2></div>
+
+    <h3 class="para">Sea level and current maps</h3>
     <figure>
       <div class="plot wide"><img src="figures/tide_file.png" alt="Three maps of New Zealand: M2 elevation amplitude up to 1.2 m with phase lines, K1 elevation amplitude up to 0.14 m with phase lines, and M2 current semi-major axis, strongest in Cook Strait and south of the South Island"></div>
       <figcaption>Left: M2 amplitude and phase (white lines every 30°). The phase lines turn round New Zealand: the M2 high water travels anticlockwise round the country, so it is high tide on one side of Cook Strait when it is near low tide on the other side. Middle: K1. Right: M2 Cmax. Phases are relative to 2026-01-01, not Greenwich phases.</figcaption>
@@ -602,60 +595,66 @@ out.to_netcdf(OUT, encoding={"tidal_constituents": {"dtype": "S1"}})</pre>
       <div class="plot wide"><img src="figures/all_amplitudes.png" alt="Fifteen small maps, one per tidal constituent, each showing sea-level amplitude with its own colour scale"></div>
       <figcaption>All 15 constituents. Each map has its own colour scale; the largest value is in the title. The twice-a-day tides (top row) are largest on the west coast. The once-a-day tides (middle row) have points of near-zero amplitude east of New Zealand. The shallow-water tides (M4, MS4, MN4) are only large in shallow bays and straits. The long-period tides (MF, MM) are a few cm and change mostly with latitude.</figcaption>
     </figure>
-    <h3>Cmax and Cmin of the six largest constituents</h3>
+
+    <h3 class="para">Cmax and Cmin of the six largest constituents</h3>
     <figure>
       <div class="plot tall"><img src="figures/cmax_cmin.png" alt="Twelve maps in four rows: Cmax then Cmin for M2, S2 and N2, then Cmax and Cmin for K2, K1 and O1. The semidiurnal Cmax maps all have the same pattern, strongest in Cook Strait, Kaipara and south of Stewart Island. The diurnal K1 and O1 Cmax maps are different, with a broad band of strong current over the Chatham Rise east of the South Island. Cmin is positive, anticlockwise, in those same places"></div>
       <figcaption>Top two rows: M2, S2, N2. Bottom two rows: K2, K1, O1. Cmax on its own scale per constituent (top of the scale at the 99.5th percentile; the largest value is in the title). Cmin on a symmetric scale: blue positive = anticlockwise, orange negative = clockwise, the same colours as the ellipse map. The four semidiurnal maps have the same pattern and only the size changes (largest Cmax: M2 1.32, S2 0.28, N2 0.27, K2 0.09 m/s), which is the reality check one expects. The diurnal K1 and O1 are different: their currents are much larger than their sea-level amplitudes suggest (K1 Cmax 0.66 m/s with Eamp only 0.14 m) and sit in a broad band over the Chatham Rise and the shelf south of Stewart Island, turning anticlockwise. Those are the diurnal shelf-trapped waves known from the New Zealand tide literature, and TPXO carries them into the file.</figcaption>
     </figure>
-    <p class="col">The largest values per constituent in <code>moana_tides.nc</code>:</p>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>Name</th><th>What it is</th><th class="n">Period (h)</th><th class="n">Max Eamp (m)</th><th class="n">Max Cmax (m/s)</th></tr></thead>
-        <tbody>
-          <tr class="group"><td colspan="5">Twice a day (semidiurnal)</td></tr>
-          <tr><td><strong>M2</strong></td><td>Main lunar</td><td class="n">12.421</td><td class="n">1.240</td><td class="n">1.315</td></tr>
-          <tr><td>S2</td><td>Main solar</td><td class="n">12.000</td><td class="n">0.442</td><td class="n">0.279</td></tr>
-          <tr><td>N2</td><td>Lunar, from the Moon's changing distance</td><td class="n">12.658</td><td class="n">0.246</td><td class="n">0.272</td></tr>
-          <tr><td>K2</td><td>Lunar and solar</td><td class="n">11.967</td><td class="n">0.144</td><td class="n">0.090</td></tr>
-          <tr><td>2N2</td><td>Lunar, second order distance term</td><td class="n">12.905</td><td class="n">0.040</td><td class="n">0.043</td></tr>
-          <tr class="group"><td colspan="5">Once a day (diurnal)</td></tr>
-          <tr><td><strong>K1</strong></td><td>Lunar and solar</td><td class="n">23.934</td><td class="n">0.144</td><td class="n">0.658</td></tr>
-          <tr><td>O1</td><td>Main lunar</td><td class="n">25.819</td><td class="n">0.087</td><td class="n">0.376</td></tr>
-          <tr><td>P1</td><td>Main solar</td><td class="n">24.066</td><td class="n">0.038</td><td class="n">0.162</td></tr>
-          <tr><td>Q1</td><td>Lunar, from the Moon's changing distance</td><td class="n">26.868</td><td class="n">0.024</td><td class="n">0.143</td></tr>
-          <tr><td>S1</td><td>Solar, mostly from daily heating and air pressure</td><td class="n">24.000</td><td class="n">0.009</td><td class="n">0.031</td></tr>
-          <tr class="group"><td colspan="5">Long period</td></tr>
-          <tr><td>MF</td><td>Fortnightly</td><td class="n">327.859</td><td class="n">0.026</td><td class="n">0.014</td></tr>
-          <tr><td>MM</td><td>Monthly</td><td class="n">661.309</td><td class="n">0.009</td><td class="n">0.003</td></tr>
-          <tr class="group"><td colspan="5">Shallow water (four times a day)</td></tr>
-          <tr><td>M4</td><td>M2 overtide, made in shallow water</td><td class="n">6.210</td><td class="n">0.146</td><td class="n">0.093</td></tr>
-          <tr><td>MS4</td><td>M2 + S2 interaction</td><td class="n">6.103</td><td class="n">0.035</td><td class="n">0.029</td></tr>
-          <tr><td>MN4</td><td>M2 + N2 interaction</td><td class="n">6.269</td><td class="n">0.029</td><td class="n">0.038</td></tr>
-        </tbody>
-      </table>
+
+    <h3 class="para">Largest values per constituent</h3>
+    <div>
+      <div class="tcap">Maxima in moana_tides.nc</div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Name</th><th>What it is</th><th class="n">Period (h)</th><th class="n">Max Eamp (m)</th><th class="n">Max Cmax (m/s)</th></tr></thead>
+          <tbody>
+            <tr class="group"><td colspan="5">Twice a day (semidiurnal)</td></tr>
+            <tr><td><strong>M2</strong></td><td>Main lunar</td><td class="n">12.421</td><td class="n">1.240</td><td class="n">1.315</td></tr>
+            <tr><td>S2</td><td>Main solar</td><td class="n">12.000</td><td class="n">0.442</td><td class="n">0.279</td></tr>
+            <tr><td>N2</td><td>Lunar, from the Moon's changing distance</td><td class="n">12.658</td><td class="n">0.246</td><td class="n">0.272</td></tr>
+            <tr><td>K2</td><td>Lunar and solar</td><td class="n">11.967</td><td class="n">0.144</td><td class="n">0.090</td></tr>
+            <tr><td>2N2</td><td>Lunar, second order distance term</td><td class="n">12.905</td><td class="n">0.040</td><td class="n">0.043</td></tr>
+            <tr class="group"><td colspan="5">Once a day (diurnal)</td></tr>
+            <tr><td><strong>K1</strong></td><td>Lunar and solar</td><td class="n">23.934</td><td class="n">0.144</td><td class="n">0.658</td></tr>
+            <tr><td>O1</td><td>Main lunar</td><td class="n">25.819</td><td class="n">0.087</td><td class="n">0.376</td></tr>
+            <tr><td>P1</td><td>Main solar</td><td class="n">24.066</td><td class="n">0.038</td><td class="n">0.162</td></tr>
+            <tr><td>Q1</td><td>Lunar, from the Moon's changing distance</td><td class="n">26.868</td><td class="n">0.024</td><td class="n">0.143</td></tr>
+            <tr><td>S1</td><td>Solar, mostly from daily heating and air pressure</td><td class="n">24.000</td><td class="n">0.009</td><td class="n">0.031</td></tr>
+            <tr class="group"><td colspan="5">Long period</td></tr>
+            <tr><td>MF</td><td>Fortnightly</td><td class="n">327.859</td><td class="n">0.026</td><td class="n">0.014</td></tr>
+            <tr><td>MM</td><td>Monthly</td><td class="n">661.309</td><td class="n">0.009</td><td class="n">0.003</td></tr>
+            <tr class="group"><td colspan="5">Shallow water (four times a day)</td></tr>
+            <tr><td>M4</td><td>M2 overtide, made in shallow water</td><td class="n">6.210</td><td class="n">0.146</td><td class="n">0.093</td></tr>
+            <tr><td>MS4</td><td>M2 + S2 interaction</td><td class="n">6.103</td><td class="n">0.035</td><td class="n">0.029</td></tr>
+            <tr><td>MN4</td><td>M2 + N2 interaction</td><td class="n">6.269</td><td class="n">0.029</td><td class="n">0.038</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <h3 style="margin-top:10px">The tide ROMS will make, at three places</h3>
+    <h3 class="para">The tide ROMS will make, at three places</h3>
     <figure>
       <div class="plot wide"><img src="figures/tide_series.png" alt="Hourly sea level for January to March 2026 at Taranaki Bight, Cook Strait and the Otago shelf, each with a bar chart of the six largest constituent amplitudes. Taranaki has a range of about 3 m with clear spring and neap cycles; Cook Strait about 1 m"></div>
       <figcaption>Sea level built from the file the same way ROMS builds it (\(\sum_k E_k\cos(\omega_k t-\varphi_k)\), \(t\) from 2026-01-01), hourly for the 3-month run. Right: the 6 largest constituents at each point, in cm. Taranaki Bight has the largest tide in the domain (M2 114 cm, range about 3 m at spring tide). In Cook Strait, M2 is only 34 cm, because the strait is near a point where the M2 waves from the two sides cancel. The beat between M2, S2 and N2 gives the spring–neap cycles and the slow monthly change in their size.</figcaption>
     </figure>
 
-    <h3 style="margin-top:10px">How we know it is right</h3>
+    <h3 class="para">How we know it is right</h3>
     <ul class="checks">
-      <li><span class="k ok">Test 1 · Ross Sea test grid, CATS2008</span><span>The ROMS-style sum of the file agrees with a direct pyTMD prediction to 1e-13 for ζ, u and v (with fixed nodal values). With nodal values that change in time, the difference after 30 days is 1 to 3 mm.</span></li>
-      <li><span class="k ok">Test 2 · Moana grid</span><span>The Oceanum Re/Im sign matches the original OSU TPXO files (M2 to 1e-8 m). At deep points the file matches raw TPXO to 5e-16 m. No NaN.</span></li>
-      <li><span class="k ok">Test 3 · Phase zero moved to 2026-01-01</span><span>The file with phase zero at 2010-01-01 and the file with phase zero at 2026-01-01 give the same sea level on 2026-01-01, 2026-02-15 and 2026-03-31 (max difference below 1e-9 m). This shows that step 3 moves the clock correctly.</span></li>
-      <li><span class="k ok">Test 4 · Worked example by hand</span><span>Step 3e: \(E=fA\) and \(\varphi=G-V-u\) computed by hand from the TPXO numbers at Taranaki Bight reproduce the file values 1.1355 m and 227.90° exactly.</span></li>
+      <li><span class="k">Test 1 · Ross Sea test grid, CATS2008</span><span>The ROMS-style sum of the file agrees with a direct pyTMD prediction to 1e-13 for ζ, u and v (with fixed nodal values). With nodal values that change in time, the difference after 30 days is 1 to 3 mm.</span></li>
+      <li><span class="k">Test 2 · Moana grid</span><span>The Oceanum Re/Im sign matches the original OSU TPXO files (M2 to 1e-8 m). At deep points the file matches raw TPXO to 5e-16 m. No NaN.</span></li>
+      <li><span class="k">Test 3 · Phase zero moved to 2026-01-01</span><span>The file with phase zero at 2010-01-01 and the file with phase zero at 2026-01-01 give the same sea level on 2026-01-01, 2026-02-15 and 2026-03-31 (max difference below 1e-9 m). This shows that step 3 moves the clock correctly.</span></li>
+      <li><span class="k">Test 4 · Worked example by hand</span><span>Paragraph 2-10: \(E=fA\) and \(\varphi=G-V-u\) computed by hand from the TPXO numbers at Taranaki Bight reproduce the file values 1.1355 m and 227.90° exactly.</span></li>
     </ul>
   </div>
 </section>
 
-<section id="rom">
+<!-- ============================ CHAPTER 4 ============================ -->
+<section class="chapter" id="ch4" style="--chn:'4'">
   <div class="stack">
-    <span class="eyebrow">Downstream</span>
-    <h2>How ROMS uses the file</h2>
-    <p class="col">In <code>Apps/moana/Include/moana.h</code>, <code>SSH_TIDES</code>, <code>UV_TIDES</code>, <code>ADD_FSOBC</code> and <code>ADD_M2OBC</code> are on and <code>RAMP_TIDES</code> is off. The boxes below follow one constituent from the file to the open boundary. Fortran names are from <code>ROMS/Utility/tides_date.F</code> and <code>ROMS/Nonlinear/set_tides.F</code>.</p>
+    <div class="chapter-head"><span class="chapter-label">Chapter 4</span><h2>How ROMS uses the file</h2></div>
+    <h3 class="para">From the file to the open boundary</h3>
+    <p>In <code>Apps/moana/Include/moana.h</code>, <code>SSH_TIDES</code>, <code>UV_TIDES</code>, <code>ADD_FSOBC</code> and <code>ADD_M2OBC</code> are on and <code>RAMP_TIDES</code> is off. The boxes below follow one constituent from the file to the open boundary. Fortran names are from <code>ROMS/Utility/tides_date.F</code> and <code>ROMS/Nonlinear/set_tides.F</code>.</p>
     <div class="flow">
       <div class="fbox file">
         <div class="where"><b>moana_tides.nc</b>read once at start</div>
@@ -679,7 +678,7 @@ out.to_netcdf(OUT, encoding={"tidal_constituents": {"dtype": "S1"}})</pre>
         <div class="body">
           <p>For every constituent \(k\) with \(T_k>0\):</p>
           $$\Omega_k=\frac{2\pi\,(\tau-86400\cdot\texttt{tide\_start})}{T_k}=\omega_k\,t,\qquad t=\text{seconds since }d_0.$$
-          <p>This is the \(\omega_k t\) of the formula at the top of the page, and the reason the script put \(V_k\) at \(d_0\) into \(\varphi_k\): ROMS counts \(t\) from \(d_0\). <code>ramp</code> = 1 because <code>RAMP_TIDES</code> is off.</p>
+          <p>This is the \(\omega_k t\) of paragraph 1-1, and the reason the script put \(V_k\) at \(d_0\) into \(\varphi_k\): ROMS counts \(t\) from \(d_0\). <code>ramp</code> = 1 because <code>RAMP_TIDES</code> is off.</p>
         </div>
       </div>
       <div class="farrow">↓</div>
@@ -697,7 +696,7 @@ out.to_netcdf(OUT, encoding={"tidal_constituents": {"dtype": "S1"}})</pre>
             <p>With \(\alpha=\theta-\texttt{angler}\) (grid rotation, below 0.03° in Moana) and \(\phi=\Omega_k-\psi\):</p>
             $$u_{\text{tide}}=\sum_k\big[C_{\max}\cos\alpha\cos\phi-C_{\min}\sin\alpha\sin\phi\big]$$
             $$v_{\text{tide}}=\sum_k\big[C_{\max}\sin\alpha\cos\phi+C_{\min}\cos\alpha\sin\phi\big]$$
-            <p>This is the real and imaginary part of \(e^{i\alpha}[C_{\max}\cos\phi+iC_{\min}\sin\phi]\) from step 4. Then averaged to u and v points and multiplied by <code>umask</code>, <code>vmask</code>.</p>
+            <p>This is the real and imaginary part of \(e^{i\alpha}[C_{\max}\cos\phi+iC_{\min}\sin\phi]\) from paragraph 2-11. Then averaged to u and v points and multiplied by <code>umask</code>, <code>vmask</code>.</p>
           </div>
         </div>
       </div>
@@ -722,76 +721,88 @@ out.to_netcdf(OUT, encoding={"tidal_constituents": {"dtype": "S1"}})</pre>
   </div>
 </section>
 
-<section id="sync">
+<!-- ============================ CHAPTER 5 ============================ -->
+<section class="chapter" id="ch5" style="--chn:'5'">
   <div class="stack">
-    <span class="eyebrow">Settings</span>
-    <h2>Things to keep in sync</h2>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>Setting in the script</th><th>Now</th><th>Must match</th><th>If it does not</th></tr></thead>
-        <tbody>
-          <tr><td><code>REF_DATE</code></td><td>2026-01-01</td><td>Nothing by hand: it is written as <code>zero_phase_date</code> and ROMS sets <code>tide_start</code> from it (see above). <code>TIDE_START</code> in <code>moana.in</code> is then ignored.</td><td>If the variable were missing, ROMS would use <code>TIME_REF</code> + <code>TIDE_START</code> instead, and a mismatch moves every tide in time. For M2, one hour is a 29° phase error.</td></tr>
-          <tr><td><code>NODAL_DATE</code></td><td>2026-02-15</td><td>The middle of the model run (2026-01-01 to 2026-04-01). Make the file again for each new year or run period.</td><td>Lunar amplitudes and phases drift: after one year K2 is 4% and 5° off, K1 1.3% and 2.4° off (table in step 3d).</td></tr>
-          <tr><td><code>GRID</code></td><td><code>grid/moana_grid_N50.nc</code></td><td>The grid that ROMS runs on</td><td>Values land on the wrong points, or the script stops.</td></tr>
-          <tr><td><code>OUT</code></td><td><code>oceanum_input/tide_forcing/moana_tides.nc</code></td><td><code>TIDENAME</code> in the ROMS input file</td><td>ROMS reads a different tide file.</td></tr>
-        </tbody>
-      </table>
+    <div class="chapter-head"><span class="chapter-label">Chapter 5</span><h2>Settings to keep in sync</h2></div>
+    <h3 class="para">Script settings and what they must match</h3>
+    <div>
+      <div class="tcap">Settings in make_tides.py</div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Setting</th><th>Now</th><th>Must match</th><th>If it does not</th></tr></thead>
+          <tbody>
+            <tr><td><code>REF_DATE</code></td><td>2026-01-01</td><td>Nothing by hand: it is written as <code>zero_phase_date</code> and ROMS sets <code>tide_start</code> from it (chapter 4). <code>TIDE_START</code> in <code>moana.in</code> is then ignored.</td><td>If the variable were missing, ROMS would use <code>TIME_REF</code> + <code>TIDE_START</code> instead, and a mismatch moves every tide in time. For M2, one hour is a 29° phase error.</td></tr>
+            <tr><td><code>NODAL_DATE</code></td><td>2026-02-15</td><td>The middle of the model run (2026-01-01 to 2026-04-01). Make the file again for each new year or run period.</td><td>Lunar amplitudes and phases drift: after one year K2 is 4% and 5° off, K1 1.3% and 2.4° off (table 2-2).</td></tr>
+            <tr><td><code>GRID</code></td><td><code>grid/moana_grid_N50.nc</code></td><td>The grid that ROMS runs on</td><td>Values land on the wrong points, or the script stops.</td></tr>
+            <tr><td><code>OUT</code></td><td><code>oceanum_input/tide_forcing/moana_tides.nc</code></td><td><code>TIDENAME</code> in the ROMS input file</td><td>ROMS reads a different tide file.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
 
-<section id="appendix">
+<!-- ============================ APPENDIX A ============================ -->
+<section class="chapter" id="appa" style="--chn:'A'">
   <div class="stack">
-    <span class="eyebrow">Appendix</span>
-    <h2>Current ellipses: from (u, v) to (Cmax, Cmin, Cangle, Cphase)</h2>
-    <p class="col">This is Foreman's (1989) construction, as coded in <code>pyTMD.ellipse.ellipse</code>. It is what step 4 does, and the formula ROMS uses is its inverse.</p>
-    <h3>A1. Two counter-rotating circles</h3>
-    <p class="col">After step 3, one constituent at one point has complex harmonics \(u_c=a_u e^{-ig_u}\) and \(v_c=a_v e^{-ig_v}\), so the physical currents are \(u(t)=\operatorname{Re}(u_c e^{i\omega t})=a_u\cos(\omega t-g_u)\) and \(v(t)=a_v\cos(\omega t-g_v)\). Write the current as one complex number in the east–north plane, \(w(t)=u(t)+i\,v(t)\), and use \(\operatorname{Re}(x)=\tfrac12(x+\bar x)\):</p>
-    <div class="formula">
+    <div class="chapter-head"><span class="chapter-label">Appendix A</span><h2>Current ellipses: from (u, v) to (Cmax, Cmin, Cangle, Cphase)</h2></div>
+    <p>This is Foreman's (1989) construction, as coded in <code>pyTMD.ellipse.ellipse</code>. It is what step 4 does, and the formula ROMS uses is its inverse.</p>
+
+    <h3 class="para">Two counter-rotating circles</h3>
+    <p>After step 3, one constituent at one point has complex harmonics \(u_c=a_u e^{-ig_u}\) and \(v_c=a_v e^{-ig_v}\), so the physical currents are \(u(t)=\operatorname{Re}(u_c e^{i\omega t})=a_u\cos(\omega t-g_u)\) and \(v(t)=a_v\cos(\omega t-g_v)\). Write the current as one complex number in the east–north plane, \(w(t)=u(t)+i\,v(t)\), and use \(\operatorname{Re}(x)=\tfrac12(x+\bar x)\):</p>
+    <div class="eq">
       $$w(t)=\tfrac12\big(u_c+i\,v_c\big)e^{\,i\omega t}+\tfrac12\big(\bar u_c+i\,\bar v_c\big)e^{-i\omega t}
       = w_+\,e^{\,i\omega t}+w_-\,e^{-i\omega t},$$
       $$w_+=\tfrac12\,(u_c+i\,v_c)=a_+e^{\,i\varepsilon_+},\qquad w_-=\tfrac12\,\overline{(u_c-i\,v_c)}=a_-e^{\,i\varepsilon_-}.$$
       <small>These are the two lines <code>wp</code> and <code>wm</code> in pyTMD. The current is the sum of a vector of length \(a_+\) turning anticlockwise and a vector of length \(a_-\) turning clockwise, both at rate \(\omega\).</small>
     </div>
-    <h3>A2. Read the ellipse off the two circles</h3>
-    <p class="col">The two vectors line up when their angles are equal: \(\omega t+\varepsilon_+=-\omega t+\varepsilon_-\). At that instant the speed is largest, \(a_++a_-\), and a quarter period later they are opposed and the speed is smallest, \(|a_+-a_-|\). Solving gives the four ellipse numbers:</p>
-    <div class="formula">
+
+    <h3 class="para">Read the ellipse off the two circles</h3>
+    <p>The two vectors line up when their angles are equal: \(\omega t+\varepsilon_+=-\omega t+\varepsilon_-\). At that instant the speed is largest, \(a_++a_-\), and a quarter period later they are opposed and the speed is smallest, \(|a_+-a_-|\). Solving gives the four ellipse numbers:</p>
+    <div class="eq">
       $$C_{\max}=a_++a_-,\qquad C_{\min}=a_+-a_-,\qquad \theta=\frac{\varepsilon_++\varepsilon_-}{2},\qquad \psi=\frac{\varepsilon_--\varepsilon_+}{2}$$
       <small>\(\theta\) = Cangle (direction of the vector when the two line up), \(\psi\) = Cphase (the value of \(\omega t\) when they line up). pyTMD then folds \(\theta\) into 0–180° and adds 180° to \(\psi\) whenever it does, so that the pair still points to the same instant. \(C_{\min}>0\) when the anticlockwise circle is the bigger one, so the sign of Cmin is the sense of rotation.</small>
     </div>
-    <h3>A3. Back to u and v, as ROMS does it</h3>
-    <p class="col">Substituting \(a_\pm=\tfrac12(C_{\max}\pm C_{\min})\) and \(\varepsilon_\pm=\theta\mp\psi\) into A1 and collecting terms:</p>
-    <div class="formula">
+
+    <h3 class="para">Back to u and v, as ROMS does it</h3>
+    <p>Substituting \(a_\pm=\tfrac12(C_{\max}\pm C_{\min})\) and \(\varepsilon_\pm=\theta\mp\psi\) into A-1 and collecting terms:</p>
+    <div class="eq">
       $$w(t)=e^{\,i\theta}\Big[C_{\max}\cos(\omega t-\psi)+i\,C_{\min}\sin(\omega t-\psi)\Big]$$
-      <small>Taking real and imaginary parts with \(\phi=\omega t-\psi\) gives \(u=C_{\max}\cos\theta\cos\phi-C_{\min}\sin\theta\sin\phi\) and \(v=C_{\max}\sin\theta\cos\phi+C_{\min}\cos\theta\sin\phi\): the lines <code>Uwrk</code> and <code>Vwrk</code> in <code>set_tides.F</code>, with \(\theta\) replaced by \(\theta-\texttt{angler}\) to put the result on the rotated grid. Test 1 above checks this round trip to 1e-13.</small>
+      <small>Taking real and imaginary parts with \(\phi=\omega t-\psi\) gives \(u=C_{\max}\cos\theta\cos\phi-C_{\min}\sin\theta\sin\phi\) and \(v=C_{\max}\sin\theta\cos\phi+C_{\min}\cos\theta\sin\phi\): the lines <code>Uwrk</code> and <code>Vwrk</code> in <code>set_tides.F</code>, with \(\theta\) replaced by \(\theta-\texttt{angler}\) to put the result on the rotated grid. Test 1 in chapter 3 checks this round trip to 1e-13.</small>
     </div>
-    <h3>A4. Why the four numbers are enough</h3>
-    <p class="col">\((a_u,g_u,a_v,g_v)\) and \((C_{\max},C_{\min},\theta,\psi)\) are two coordinate systems for the same four degrees of freedom. The ellipse set is the natural one for a vector: a rotation of the axes by an angle \(\beta\) multiplies \(w\) by \(e^{-i\beta}\), which changes \(\theta\) to \(\theta-\beta\) and leaves \(C_{\max}\), \(C_{\min}\), \(\psi\) alone. That is exactly the one subtraction ROMS does with <code>angler</code>.</p>
+
+    <h3 class="para">Why the four numbers are enough</h3>
+    <p>\((a_u,g_u,a_v,g_v)\) and \((C_{\max},C_{\min},\theta,\psi)\) are two coordinate systems for the same four degrees of freedom. The ellipse set is the natural one for a vector: a rotation of the axes by an angle \(\beta\) multiplies \(w\) by \(e^{-i\beta}\), which changes \(\theta\) to \(\theta-\beta\) and leaves \(C_{\max}\), \(C_{\min}\), \(\psi\) alone. That is exactly the one subtraction ROMS does with <code>angler</code>.</p>
   </div>
 </section>
 
-<section id="figs">
+<!-- ============================ APPENDIX B ============================ -->
+<section class="chapter" id="appb" style="--chn:'B'">
   <div class="stack">
-    <span class="eyebrow">Reproduce</span>
-    <h2>Figure scripts</h2>
-    <p class="col">Every figure on this page is made by one short script in <code>webpage_folder/</code> of the repo. Run them in the <code>moana_python</code> environment, from inside that folder. They write PNGs to <code>webpage_folder/figures/</code>. Shared paths and colours are in <code>common.py</code>.</p>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>Figure</th><th>Script</th><th>Reads</th></tr></thead>
-        <tbody>
-          <tr><td>TPXO input</td><td><code>fig_tpxo_input.py</code></td><td>TPXO cut, grid</td></tr>
-          <tr><td>Coast fill, Cook Strait</td><td><code>fig_coast_fill.py</code></td><td>TPXO cut, grid</td></tr>
-          <tr><td>Depth ratio and currents</td><td><code>fig_depth_currents.py</code></td><td>TPXO cut, grid</td></tr>
-          <tr><td>Nodal factors</td><td><code>fig_nodal.py</code></td><td>pyTMD only</td></tr>
-          <tr><td>Current at two points (ellipse, time series, direction)</td><td><code>fig_point_current.py</code></td><td>tide file</td></tr>
-          <tr><td>Current ellipses</td><td><code>fig_ellipses.py</code></td><td>tide file</td></tr>
-          <tr><td>M2 Ephase, Cphase and their difference</td><td><code>fig_cphase.py</code></td><td>tide file</td></tr>
-          <tr><td>M2, K1 and Cmax overview</td><td><code>fig_tide_file.py</code></td><td>tide file</td></tr>
-          <tr><td>All 15 amplitudes</td><td><code>fig_all_amplitudes.py</code></td><td>tide file</td></tr>
-          <tr><td>Cmax and Cmin, six constituents</td><td><code>fig_cmax_cmin.py</code></td><td>tide file</td></tr>
-          <tr><td>Sea level at three places</td><td><code>fig_tide_series.py</code></td><td>tide file</td></tr>
-        </tbody>
-      </table>
+    <div class="chapter-head"><span class="chapter-label">Appendix B</span><h2>Figure scripts</h2></div>
+    <h3 class="para">How to make every figure again</h3>
+    <p>Every figure in this manual is made by one short script in <code>webpage_folder/</code> of the repo. Run them in the <code>moana_python</code> environment, from inside that folder. They write PNGs to <code>webpage_folder/figures/</code>. Shared paths and colours are in <code>common.py</code>.</p>
+    <div>
+      <div class="tcap">Figure scripts</div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Figure</th><th>Script</th><th>Reads</th></tr></thead>
+          <tbody>
+            <tr><td>TPXO input</td><td><code>fig_tpxo_input.py</code></td><td>TPXO cut, grid</td></tr>
+            <tr><td>Coast fill, Cook Strait</td><td><code>fig_coast_fill.py</code></td><td>TPXO cut, grid</td></tr>
+            <tr><td>Depth ratio and currents</td><td><code>fig_depth_currents.py</code></td><td>TPXO cut, grid</td></tr>
+            <tr><td>Nodal factors</td><td><code>fig_nodal.py</code></td><td>pyTMD only</td></tr>
+            <tr><td>Current at two points (ellipse, time series, direction)</td><td><code>fig_point_current.py</code></td><td>tide file</td></tr>
+            <tr><td>Current ellipses</td><td><code>fig_ellipses.py</code></td><td>tide file</td></tr>
+            <tr><td>M2 Ephase, Cphase and their difference</td><td><code>fig_cphase.py</code></td><td>tide file</td></tr>
+            <tr><td>M2, K1 and Cmax overview</td><td><code>fig_tide_file.py</code></td><td>tide file</td></tr>
+            <tr><td>All 15 amplitudes</td><td><code>fig_all_amplitudes.py</code></td><td>tide file</td></tr>
+            <tr><td>Cmax and Cmin, six constituents</td><td><code>fig_cmax_cmin.py</code></td><td>tide file</td></tr>
+            <tr><td>Sea level at three places</td><td><code>fig_tide_series.py</code></td><td>tide file</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
@@ -826,7 +837,7 @@ window.MathJax = {
   var days = 30, x = function (d) { return L + d / days * (W - L - R); };
   var y = function (z) { return T + (1.75 - z) / 3.3 * (H - T - B); };
   [-1, 0, 1].forEach(function (v) {
-    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), style: "stroke:var(--rule)" }, svg);
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), style: "stroke:var(--hair)" }, svg);
     el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end", style: "fill:var(--muted);font-size:11px" }, svg).textContent = v + " m";
   });
   [0, 5, 10, 15, 20, 25, 30].forEach(function (d) {
@@ -840,7 +851,7 @@ window.MathJax = {
   var m2 = function (t) { return 1.0 * Math.cos(2 * Math.PI * t / 12.4206); };
   var s2 = function (t) { return 0.35 * Math.cos(2 * Math.PI * t / 12.0); };
   el("path", { d: path(function (t) { return m2(t) + s2(t); }), style: "fill:none;stroke:var(--ink);stroke-width:0.9" }, svg);
-  el("path", { d: path(s2), style: "fill:none;stroke:var(--mark);stroke-width:0.8;opacity:0.9" }, svg);
+  el("path", { d: path(s2), style: "fill:none;stroke:var(--accent);stroke-width:0.8;opacity:0.9" }, svg);
   // spring / neap marks (M2 and S2 in phase at t = 0, period 14.77 d)
   [0, 14.765, 29.53].forEach(function (d) { el("text", { x: x(d) + (d === 0 ? 4 : 0), y: y(1.58), "text-anchor": d === 0 ? "start" : "middle", style: "fill:var(--muted);font-size:11px" }, svg).textContent = "spring"; });
   [7.383, 22.148].forEach(function (d) { el("text", { x: x(d), y: y(1.58), "text-anchor": "middle", style: "fill:var(--muted);font-size:11px" }, svg).textContent = "neap"; });
