@@ -1,0 +1,5 @@
+# Settings for Scripts/atm/make_atm_forcing.py
+
+INPUT:  /home/nn411/Projects/OceanAtm/Moana-2.0/Data/atm_ifs_raw_2026-01-01_90D.nc     # from download_atm.py
+OUTPUT: /home/nn411/Projects/OceanAtm/Moana-2.0/Data/moana_frc_ifs_2026-01-01_90D.nc   # ROMS forcing file
+REF_TIME: "2026-01-01"                                                                  # TIME_REF in moana.in
