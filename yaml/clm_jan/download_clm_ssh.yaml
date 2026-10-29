@@ -1,0 +1,18 @@
+# Config for scripts/download_clm.py: raw DataMesh fields over the full ROMS grid, for the
+# ROMS climatology file (CLMNAME). Interpolate them with scripts/make_clm.py.
+
+# --- sources: file name -> DataMesh datasource and its variables (the same as the IC) ---
+DATASETS:
+  zos:    {DATASOURCE: cmems_mod_glo_phy_anfc_0-083deg_pt1h-m,        VARIABLES: [zos]} # Nikki : added sea surface height variable 
+LON_CONVENTION: "-180_180"        # the DATASOURCEs' convention, not the grid's
+
+# --- ROMS grid: the bbox is computed from it ---
+GRID: /projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc
+
+# --- time: first and last day of the run; the script adds the margin ---
+START: "2026-01-01"
+END: "2026-01-31"
+CHUNK: 1D                        # Nikki : chunks the data every day 
+
+# --- output: OUTPUT_DIR/<name>_raw_<from>_<to>.nc ---
+OUTPUT_DIR: /projects/f_omg_1/moa/moana/oceanum_input/climatology/raw    # team directory 

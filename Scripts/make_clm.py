@@ -28,14 +28,18 @@ VARS = {
     "v": ("vo", "uo_vo", "v", "v3d_time", "v-momentum component climatology", "meter second-1"),
     "temp": ("thetao", "thetao", "rho", "temp_time", "potential temperature climatology", "Celsius"),
     "salt": ("so", "so", "rho", "salt_time", "salinity climatology", "PSU"),
+    "zeta": ("zos", "zos", "rho", "zeta_time", "sea surface height climatology", "meter"),  # added (Nikki): sea surface height, 2D, from hourly zos
 }
 VAR, SRC, pt, TNAME, long_name, units = VARS[var]
+
+IS_2D = var == "zeta"                                        # added (Nikki): surface field, so no vertical interpolation
+
 REF_TIME = "2026-01-01"                                      # TIME_REF in ocean.in
 grid_path = '/projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc'
 #source_files = f'/projects/f_omg_1/moa/moana/oceanum_input/climatology/raw/{SRC}_raw_*.nc'
 #OUT_DIR = '/projects/f_omg_1/moa/moana/oceanum_input/climatology/roms_ready'
-source_files = f'/scratch/nn411/clm_test/raw/{SRC}_raw_*.nc'
-OUT_DIR = '/scratch/nn411/clm_test/roms_ready'
+source_files = f'/projects/f_omg_1/moa/moana/oceanum_input/climatology/raw/{SRC}_raw_*.nc'
+OUT_DIR = '/projects/f_omg_1/moa/moana/oceanum_input/climatology/roms_ready'
 TIMES = slice(None)                     # all records; e.g. slice("2026-01-01", "2026-01-02") for a test
 N_LATERAL = 10                          # same-depth fill reach, in CMEMS cells (~0.8 deg at 1/12 deg)
 LON, LAT, DEPTH, TIME = "longitude", "latitude", "elevation", "time"
@@ -53,11 +57,19 @@ lat = grid[f"lat_{pt}"].reset_coords(drop=True)
 ocean = grid[f"mask_{pt}"].reset_coords(drop=True) == 1
 DIMS = {"rho": ("s_rho", "eta_rho", "xi_rho"), "u": ("s_rho", "eta_u", "xi_u"), "v": ("s_rho", "eta_v", "xi_v")}[pt]
 
+if IS_2D:                                                    # added (Nikki)
+    DIMS = DIMS[1:]                                          # added (Nikki): output is (eta_rho, xi_rho), no s_rho
+
 # loading cmems input files: one per time chunk, two chunks share one record
 files = sorted(glob.glob(source_files))
 assert files, f"no files match {source_files}"
 ds = xr.open_mfdataset(files, combine="nested", concat_dim=TIME)
 ds = ds.assign_coords({LON: ds[LON] % 360}).sortby(LON).drop_duplicates(TIME).sel({TIME: TIMES})
+
+if IS_2D:                                                    # added (Nikki)
+    ds = ds.isel({DEPTH: 0}, drop=True)                      # added (Nikki): drop the size-1 elevation dimension of zos
+    ds = ds.isel({TIME: (ds[TIME].dt.hour % 6 == 0).values}) # added (Nikki): hourly -> 00, 06, 12, 18 UTC, like the 3D fields
+
 times = pd.DatetimeIndex(ds[TIME].values)
 print(f"{len(files)} files, {len(times)} records: {times[0]} to {times[-1]}")
 
@@ -82,7 +94,8 @@ def flood_fill(da, max_passes=None):
 
 def fill(cm):
     cm = flood_fill(cm, max_passes=N_LATERAL)     # same-depth neighbours first (slopes and coasts)
-    cm = cm.bfill(DEPTH)                          # below the CMEMS seafloor: deepest valid value downward
+    if DEPTH in cm.dims:                          # added (Nikki): skip the depth step for 2D fields (zeta)
+        cm = cm.bfill(DEPTH)                      # below the CMEMS seafloor: deepest valid value downward
     return flood_fill(cm)                         # whatever is left (land interiors)
 
 
@@ -120,7 +133,9 @@ for n, t in enumerate(times):
     cm = ds[VAR].sel({TIME: t}).load()
     assert bool(cm.notnull().any()), f"CMEMS field is all NaN at {t}"
 
-    da = vertical(horizontal(fill(cm), lon, lat), z).transpose("s_rho", ...)
+    da = horizontal(fill(cm), lon, lat)                      # changed (Nikki): horizontal step on its own line
+    if not IS_2D:                                            # added (Nikki): zeta skips the vertical step
+        da = vertical(da, z).transpose("s_rho", ...)
     da = da.where(ocean, 0)
     assert not da.isnull().any(), f"NaNs left in data at {t}"
     # interpolation and neighbour-averaging can't create values outside the CMEMS range

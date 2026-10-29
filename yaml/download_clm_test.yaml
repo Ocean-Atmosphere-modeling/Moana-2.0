@@ -6,6 +6,8 @@ DATASETS:
   uo_vo:  {DATASOURCE: cmems_mod_glo_phy-cur_anfc_0-083deg_pt6h-i,    VARIABLES: [uo, vo]}
   so:     {DATASOURCE: cmems_mod_glo_phy-so_anfc_0-083deg_pt6h-i,     VARIABLES: [so]}
   thetao: {DATASOURCE: cmems_mod_glo_phy-thetao_anfc_0-083deg_pt6h-i, VARIABLES: [thetao]}
+  zos:    {DATASOURCE: cmems_mod_glo_phy_anfc_0-083deg_pt1h-m,        VARIABLES: [zos]}
+  
 LON_CONVENTION: "-180_180"        # the DATASOURCEs' convention, not the grid's
 
 # --- ROMS grid: the bbox is computed from it ---

@@ -8,7 +8,7 @@
 source ~/miniforge3/etc/profile.d/conda.sh
 conda activate moana_python
 cd /home/nn411/Projects/OceanAtm/Moana-2.0
-for v in u v temp salt; do
+for v in zeta; do
     echo "=== $v: $(date) ==="
     python -u Scripts/make_clm.py $v
 done
