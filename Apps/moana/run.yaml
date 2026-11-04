@@ -1,0 +1,101 @@
+# Run settings for ROMS: the short, readable source of the ROMS input file.
+# EXPERIMENTAL. Runs/moana.in is still the file in use.
+#
+#   python scripts/make_roms_in.py Apps/moana            # writes Apps/moana/roms_moana.in
+#   python scripts/make_roms_in.py Apps/moana --draft    # also writes when values are open
+#
+# How the ROMS input file is made:
+#   1. Start from the ROMS default file roms/User/External/roms.in (~800 keywords).
+#   2. Take grid, vertical levels and time from params.yaml (Lm, Mm, N, Vtransform,
+#      Vstretching, THETA_S, THETA_B, TCLINE, DT, NDTFAST, TIME_REF, start, end).
+#   3. Replace only the keywords in this file. All others keep the ROMS default.
+#
+# Rules:
+#   - A key is the ROMS keyword of that name (see roms.in for what it does).
+#     The sections are only for reading; the script does not use their names,
+#     except "output", which uses hours and variable lists (see there).
+#   - Write plain numbers (25.0, 1.0e-5), true/false, and lists for more than
+#     one value: per tracer [temp, salt], per boundary [west, south, east, north].
+#   - "(yet to decide)" is a value that nobody has chosen. "# moana.in:" gives
+#     the value in Runs/moana.in (out of date, for reference only).
+#   - Do not put a params.yaml key here. The script stops if you do.
+
+schema_version: 1
+
+application:
+  TITLE: Moana 2.0
+  MyAppCPP: ROMS3D                      # must equal ROMS_APPLICATION in roms_config.sh
+  VARNAME: (yet to decide)              # path to varinfo.yaml of the pinned ROMS; moana.in: ./varinfo.dat
+  NtileI: (yet to decide)               # moana.in: 10
+  NtileJ: (yet to decide)               # moana.in: 10
+
+advection:                              # [temp, salt]
+  Hadvection: (yet to decide)           # moana.in: [SU3, SU3]
+  Vadvection: (yet to decide)           # moana.in: [C4, C4]
+
+boundaries:                             # [west, south, east, north]
+  LBC(isFsur): (yet to decide)          # moana.in: [Cha, Cha, Cha, Cha]
+  LBC(isUbar): (yet to decide)          # moana.in: [Fla, Fla, Fla, Fla]
+  LBC(isVbar): (yet to decide)          # moana.in: [Fla, Fla, Fla, Fla]
+  LBC(isUvel): (yet to decide)          # moana.in: [RadNud, RadNud, RadNud, RadNud]
+  LBC(isVvel): (yet to decide)          # moana.in: [RadNud, RadNud, RadNud, RadNud]
+  LBC(isMtke): (yet to decide)          # moana.in: [Gra, Gra, Gra, Gra]
+  LBC(isTvar): (yet to decide)          # [temp x4, salt x4]; moana.in: RadNud for all 8
+
+mixing:
+  TNU2: (yet to decide)                 # m2/s, [temp, salt]; moana.in: [25.0, 25.0]
+  VISC2: (yet to decide)                # m2/s; moana.in: 5.0
+  AKT_BAK: (yet to decide)              # m2/s, [temp, salt]; moana.in: [1.0e-5, 1.0e-5]
+  AKV_BAK: (yet to decide)              # m2/s; moana.in: 1.0e-5
+  # moana.in also changes GLS_P ... GLS_SIGP (GLS closure constants). Add them here if needed.
+
+bottom_and_surface:
+  RDRG2: (yet to decide)                # quadratic bottom drag; moana.in: 1.0e-3
+  Zob: (yet to decide)                  # m, bottom roughness; moana.in: 0.02
+  BLK_ZQ: (yet to decide)               # m, height of air humidity; moana.in: 2.0
+  BLK_ZT: (yet to decide)               # m, height of air temperature; moana.in: 2.0
+  BLK_ZW: (yet to decide)               # m, height of winds; moana.in: 10.0
+
+tides:
+  # TIDE_START = tide_zero_phase_date - TIME_REF, in days (the script works it out).
+  tide_zero_phase_date: 2026-01-01      # REF_DATE in scripts/make_tides.py
+
+nudging:
+  TNUDG: (yet to decide)                # days, [temp, salt]; moana.in: [1.0, 1.0]
+  M3NUDG: (yet to decide)               # days; moana.in: 1.0
+  OBCFAC: (yet to decide)               # outflow/inflow nudging ratio; moana.in: 10.0
+  Lm3CLM: (yet to decide)               # moana.in: true
+  LtracerCLM: (yet to decide)           # moana.in: [true, true]
+  LnudgeM3CLM: (yet to decide)          # moana.in: true
+  LnudgeTCLM: (yet to decide)           # moana.in: [true, true]
+
+rivers:
+  LuvSrc: (yet to decide)               # moana.in: true
+  LtracerSrc: (yet to decide)           # moana.in: [true, true]
+
+# Output. "every_hours" becomes NHIS, NAVG, NQCK, NDIA or NRST in time steps
+# (every_hours * 3600 / DT must be a whole number). "vars" are the ROMS ids
+# (idFsur, idTvar, ...) to write; all other ids of that file are switched off.
+output:
+  history:
+    every_hours: (yet to decide)        # moana.in: 1
+    vars: (yet to decide)               # moana.in: [idFsur, idu2dE, idv2dN, idu3dE, idv3dN, idWvel, idTvar,
+                                        #   idpthR, idpthW, idUsms, idVsms, idPair, idTsur, idVvis, idTdif, idSdif]
+  average:
+    every_hours: (yet to decide)        # moana.in: 24
+    vars: (yet to decide)               # moana.in: [idFsur, idUbar, idVbar, idUvel, idVvel, idWvel, idOvel, idTvar]
+  restart:
+    every_hours: (yet to decide)        # moana.in: 24
+
+# Input files. A list gives more than one file; the script sets NFFILES,
+# NBCFILES and NCLMFILES from the list length. Output files keep the ROMS
+# names (roms_his.nc, roms_avg.nc, ...) until HISNAME, AVGNAME, ... are added here.
+files:
+  GRDNAME: /projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc
+  ININAME: (yet to decide)              # scripts/make_ic.py writes one file per variable now
+  BRYNAME: (yet to decide)              # make_bry.yaml writes .../boundary_cond/moana_bry.nc, but on grd_moana5km.nc
+  TIDENAME: /projects/f_omg_1/moa/moana/oceanum_input/tide_forcing/moana_tides.nc   # scripts/make_tides.py
+  CLMNAME: (yet to decide)              # climatology for the nudging (LnudgeM3CLM, LnudgeTCLM)
+  NUDNAME: (yet to decide)              # nudging time scales
+  SSFNAME: (yet to decide)              # river sources (LuvSrc, LtracerSrc)
+  FRCNAME: (yet to decide)              # atmosphere

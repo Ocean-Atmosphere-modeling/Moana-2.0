@@ -1,0 +1,29 @@
+# Blueprint: everything that defines this application, in one file.
+# Checked by scripts/check_blueprint.sh every time a run is submitted, so it
+# cannot drift from the files it points to.
+# Format: "key: value" lines, two spaces per level, no lists.
+
+schema_version: 1
+name: moana
+description: Moana ROMS forward model, 5 km New Zealand, DataMesh inputs only (docs/decisions.md D1, D2)
+state: draft                      # draft (not yet compared with anything) | validated
+
+code:
+  roms:
+    location: https://github.com/myroms/roms.git
+    commit: 57aecf589a408b1e5490d2db7f9bd0196062a44e    # must equal the roms/ submodule pin
+
+compile_time:
+  header: moana.h                 # CPP options (docs/roadmap.md M3-T1)
+  chained_cpp_flags: -DPERFECT_RESTART    # added when the run has more than one segment
+
+run_time:
+  input: roms_moana.in            # run parameters (P1-M2-T02, not written yet)
+  job: run_moana.slurm            # build, run, check (P1-M2-T03, not written yet)
+  parameters: params.yaml         # grid, vertical levels, time (scripts/check_params.py)
+
+inputs:
+  manifest: inputs.tsv            # sha256, path, source, version, script for every input file
+
+run:
+  segments: 1
