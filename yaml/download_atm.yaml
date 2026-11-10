@@ -6,10 +6,10 @@ DATASOURCE: ecmwf_ifs_0p25_oper_sfc
 VARIABLES: [u10, v10, t2m, d2m, msl, tp, ssr, strd]
 VAR_NAME: ifs
 # DATE: 2026-01-01
-DATE: 2025-12-31
+DATE: 2026-11-01
 OUTPUT_DIR : "/home/nn411/Projects/OceanAtm/Moana-2.0/Data"
 # OUTPUT_DIR : "/home/nn411/Projects/OceanAtm/Moana-2.0/atm_test_script"
 # PERIOD: 90D            # 90D for the full run
-PERIOD: 91D
+PERIOD: 9D
 # GRID: "/projects/f_omg_1/moa/moana/grd_moana5km.nc"  # ROMS grid, or None to use NZ_BBOX
 GRID: "/projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc"    # New grid file updated

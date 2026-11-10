@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=atm_download
-#SBATCH --partition=main
+#SBATCH --partition=p_omg_1
 #SBATCH --time=06:00:00
 #SBATCH --mem=16G
 #SBATCH --output=atm_download_%j.log

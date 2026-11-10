@@ -222,7 +222,8 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Time-Stepping parameters.
 
 !      NTIMES == 3456            ! 4 days at DT = 100 s
-       NTIMES == 6048            ! 7 days at DT = 100 s
+!      NTIMES == 6048            ! 7 days at DT = 100 s
+       NTIMES == 26784           ! 31 days at DT = 100 s
           DT == 100.0d0
      NDTFAST == 44
 
@@ -261,7 +262,8 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Output history, quicksave, average, and diagnostic files parameters.
 
      LDEFOUT == T
-        NHIS == 36         ! hourly 
+        !NHIS == 36         ! hourly 
+        NHIS == 216         ! every 6 hours
      NDEFHIS == 0
         NQCK == 36
      NDEFQCK == 0

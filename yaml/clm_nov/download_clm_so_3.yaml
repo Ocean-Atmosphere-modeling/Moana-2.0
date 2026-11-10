@@ -1,0 +1,11 @@
+DATASETS:
+  so:
+    DATASOURCE: cmems_mod_glo_phy-so_anfc_0-083deg_pt6h-i
+    VARIABLES:
+    - so
+LON_CONVENTION: '-180_180'
+GRID: /projects/f_omg_1/moa/moana/grid/moana_grid_N50.nc
+START: '2026-11-09'
+END: '2026-11-10'
+CHUNK: 1D
+OUTPUT_DIR: /projects/f_omg_1/moa/moana/oceanum_input/climatology/raw_nov2026
