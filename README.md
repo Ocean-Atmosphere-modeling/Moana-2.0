@@ -22,4 +22,4 @@ Moana Model overview-
 ![Moana Grid](https://github.com/Ocean-Atmosphere-modeling/Moana-2.0/blob/suman/Apps/moana/Figures/moana_grid.png?review=true)
 
 
-<img width="1588" height="2398" alt="lic_preview_0360" src="https://github.com/user-attachments/assets/3d05316e-6b4d-4b8c-99ee-c7d4564e5d25" />
+
